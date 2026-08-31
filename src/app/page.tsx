@@ -1,69 +1,64 @@
-import Image from "next/image";
+import { Container } from "@/components/layout/container";
 
-export default function Home() {
+/**
+ * Placeholder home page.
+ *
+ * Exists to prove tokens + typography + layout compose correctly. Every string
+ * here is a placeholder and every block is expected to be replaced once real
+ * content and sections arrive.
+ */
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <Container
+      as="section"
+      className="flex min-h-[calc(100svh-4rem)] flex-col justify-center py-24 lg:py-32"
+    >
+      <div className="max-w-prose-page">
+        {/* Eyebrow - mono label + the one accent mark on the page. */}
+        <p className="label flex items-center gap-2.5 text-muted">
+          <span aria-hidden className="size-1.5 rounded-full bg-accent" />
+          Placeholder eyebrow
+        </p>
+
+        <h1 className="mt-6 text-balance">
+          Headline placeholder for the hero section
+        </h1>
+
+        <p className="mt-6 text-pretty text-body-lg text-muted">
+          Supporting paragraph placeholder. Two or three lines of copy sit here
+          to set the measure and prove the body scale reads correctly against
+          the muted foreground token.
+        </p>
+
+        <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+          {/* Primary accent - reserved for the single most important action. */}
+          <span className="inline-flex h-10 items-center rounded-md bg-accent px-5 text-small font-medium text-background">
+            Primary action
+          </span>
+
+          {/* Secondary blue - links and hover states. */}
+          <span className="text-small text-muted transition-colors hover:text-link">
+            Secondary action
+          </span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* Hairline metadata strip - a restrained nod to the terminal feel and a
+          check that mono, muted and border tokens sit together. */}
+      <dl className="mt-20 grid gap-px border-t border-border pt-6 font-mono text-label text-muted sm:grid-cols-3">
+        <div className="flex gap-2">
+          <dt>Status</dt>
+          <dd className="text-foreground">Placeholder</dd>
         </div>
-      </main>
-    </div>
+        <div className="flex gap-2">
+          <dt>Location</dt>
+          <dd className="text-foreground">Placeholder</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt>Focus</dt>
+          <dd className="text-foreground">Placeholder</dd>
+        </div>
+      </dl>
+    </Container>
   );
 }
