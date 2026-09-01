@@ -57,7 +57,7 @@ export const profile = {
       label: "LinkedIn",
       href: "https://www.linkedin.com/in/oyibe-chidubem-5776b537a/",
       icon: "linkedin",
-      handle: "Oyibe Chidubem",
+      handle: "in/oyibe-chidubem-5776b537a",
       primary: true,
     },
     {

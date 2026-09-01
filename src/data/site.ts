@@ -15,15 +15,15 @@ export const siteConfig: SiteConfig = {
   name: profile.name,
   role: profile.resume.title,
   description: profile.bio.short,
-  url: "https://example.com",
+  url: "https://oyibe.vercel.app",
 
   /* Grows as sections land. Projects, Contributions and the CV link are added
      in the later UI passes; only anchors that exist are listed, so the header
      never offers a dead link. */
   nav: [
-    { label: "Projects", href: "#projects" },
-    { label: "Contributions", href: "#contributions" },
-    { label: "Stack", href: "#stack" },
+    { label: "Projects", href: "/#projects" },
+    { label: "Contributions", href: "/#contributions" },
+    { label: "Stack", href: "/#stack" },
   ],
 
   /* All of them. `primary` still marks the two worth showing in tight spots. */

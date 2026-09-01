@@ -32,7 +32,7 @@ export async function SiteHeader() {
   const profile = await getProfile();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md print:hidden">
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link
           href="/"
@@ -52,12 +52,16 @@ export async function SiteHeader() {
               <ul className="flex items-center gap-7">
                 {siteConfig.nav.map((item) => (
                   <li key={item.href}>
-                    <Link
+                    {/* Plain anchor, not Link: the browser already does the
+                        right thing with a root-relative fragment — a
+                        same-document jump when on `/`, a normal navigation
+                        from `/cv` — and it needs no JavaScript to do it. */}
+                    <a
                       href={item.href}
                       className="text-small text-muted transition-colors hover:text-foreground"
                     >
                       {item.label}
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>

@@ -6,20 +6,23 @@ import { formatMonth } from "@/lib/format";
 import { iconSlugForLabel } from "@/lib/tech-labels";
 import type { Contribution } from "@/types";
 
-export type ContributionCardProps = {
+export type ContributionEntryProps = {
   contribution: Contribution;
 };
 
 /**
- * Deliberately shaped differently from `ProjectCard`.
+ * One contribution on the timeline rail.
  *
- * The reader needs two facts kept apart here: what the repository is, and what
- * *you* did to it. So the repo line and its description sit above a rule, in
- * muted text, as context — and the contribution sits below it in body text as
- * the actual claim. Collapsing those into one block is what makes most
- * open-source sections unreadable.
+ * Not a card: six bordered panels stacked down the page read as six separate
+ * things competing for attention, when this is really one continuous body of
+ * work. The rail and marker say "these belong together and there are more"
+ * without drawing a box round each one.
+ *
+ * The reader still needs two facts kept apart — what the repository is, and
+ * what *you* did to it — so the repo line and its description stay above a
+ * rule, in muted text, with the contribution below it in body text.
  */
-export function ContributionCard({ contribution }: ContributionCardProps) {
+export function ContributionEntry({ contribution }: ContributionEntryProps) {
   const {
     owner,
     repoName,
@@ -33,11 +36,14 @@ export function ContributionCard({ contribution }: ContributionCardProps) {
   } = contribution;
 
   return (
-    <article className="rounded-lg border border-border bg-surface p-6 lg:p-8">
-      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-        {/* Plain text, not a link: the Repository button below points at the
-            same URL, and two links to one destination with different names is
-            noise for anyone tabbing or listening through the card. */}
+    <li className="relative border-l border-border pb-12 pl-7 last:pb-0 lg:pl-10">
+      {/* Sits on the rail; the ring punches a clean hole through the line. */}
+      <span
+        aria-hidden="true"
+        className="absolute -left-1 top-1.5 size-2 rounded-full bg-accent ring-4 ring-background"
+      />
+
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <p className="font-mono text-small">
           {owner ? <span className="text-muted">{owner}/</span> : null}
           <span className="text-foreground">{repoName}</span>
@@ -48,19 +54,19 @@ export function ContributionCard({ contribution }: ContributionCardProps) {
             Merged {formatMonth(mergedDate)}
           </span>
         ) : null}
-      </header>
+      </div>
 
-      <p className="mt-2 text-pretty text-small text-muted">{repoDescription}</p>
-
-      <p className="mt-5 border-t border-border pt-5 text-pretty">
-        {contributionSummary}
+      <p className="mt-2 max-w-prose-page text-pretty text-small text-muted">
+        {repoDescription}
       </p>
+
+      <p className="mt-5 max-w-prose-page text-pretty">{contributionSummary}</p>
 
       {tech.length > 0 ? (
         <ul className="mt-5 flex flex-wrap gap-2">
-          {/* Free-form labels rather than TechIds, so the icon is resolved
-              from the label itself; anything unmatched falls back to the
-              neutral glyph. */}
+          {/* Free-form labels rather than TechIds, so the icon is resolved from
+              the label itself; anything unmatched falls back to the neutral
+              glyph. */}
           {tech.map((label) => (
             <Tag key={label} icon={iconSlugForLabel(label)}>
               {label}
@@ -81,9 +87,9 @@ export function ContributionCard({ contribution }: ContributionCardProps) {
       <Disclosure className="mt-5" label="Full write-up">
         <Paragraphs
           text={contributionDetails}
-          className="text-small text-muted"
+          className="max-w-prose-page text-small text-muted"
         />
       </Disclosure>
-    </article>
+    </li>
   );
 }

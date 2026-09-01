@@ -42,6 +42,24 @@
   /* --- Focus ------------------------------------------------------------- */
   --ring: var(--accent);
 
+  /* --- Paper --------------------------------------------------------------
+     Ink-on-white values for the two places this document leaves the screen:
+     the print stylesheet, and the `.cv-paper` class the PDF capture applies to
+     its clone. Defined once here so the printed CV and the downloaded PDF
+     cannot drift apart.
+
+     Not a light theme — nothing below is reachable in the browser. The accent
+     has to move because #00d9a3 sits at roughly 1.7:1 on white and would
+     vanish; these are the palette's own hues re-darkened to hold up in ink. */
+  --paper-background: #ffffff;
+  --paper-foreground: #101418;
+  --paper-muted: #4a5158;
+  --paper-border: #c7ccd1;
+  --paper-border-strong: #9aa1a8;
+  --paper-accent: #04785d;
+  --paper-link: #1a4fd0;
+  --paper-warning: #8a5a00;
+
   /* --- Layout constants -------------------------------------------------- */
   --page-gutter: 1.25rem; /* mobile side padding */
   --page-gutter-lg: 2rem; /* >= lg side padding */
@@ -276,8 +294,130 @@
 }
 
 /* ==========================================================================
+   PAPER
+   The site is dark-only, and browsers do not print background colours by
+   default — so printing it untouched puts #E4E9ED text on white paper and the
+   page comes out blank. Both rules below remap the tokens to the --paper-*
+   values; because the rest of the system reads those tokens, every component
+   follows without knowing anything about print.
+   ========================================================================== */
+
+@media print {
+  :root {
+    color-scheme: light;
+    --background: var(--paper-background);
+    --surface: var(--paper-background);
+    --surface-raised: var(--paper-background);
+    --foreground: var(--paper-foreground);
+    --muted: var(--paper-muted);
+    --border: var(--paper-border);
+    --border-strong: var(--paper-border-strong);
+    --accent: var(--paper-accent);
+    --link: var(--paper-link);
+    --warning: var(--paper-warning);
+  }
+
+  body {
+    background: #fff;
+  }
+
+  /* Underlining every URL wrecks a dense CV; the label carries the meaning. */
+  a {
+    text-decoration: none;
+  }
+}
+
+@page {
+  margin: 15mm;
+}
+
+/* Applied to the cloned node during PDF capture, never to the live page — the
+   screen keeps its dark palette while the export comes out as ink on paper. */
+.cv-paper {
+  color-scheme: light;
+  --background: var(--paper-background);
+  --surface: var(--paper-background);
+  --surface-raised: var(--paper-background);
+  --foreground: var(--paper-foreground);
+  --muted: var(--paper-muted);
+  --border: var(--paper-border);
+  --border-strong: var(--paper-border-strong);
+  --accent: var(--paper-accent);
+  --link: var(--paper-link);
+  --warning: var(--paper-warning);
+
+  background-color: var(--paper-background);
+  color: var(--paper-foreground);
+}
+
+/* ==========================================================================
    UTILITIES
    ========================================================================== */
+
+/* ==========================================================================
+   AMBIENCE
+   A slow warm drift behind the page.
+
+   Amber is the one warm hue the palette already holds (--warning), and at
+   these alphas it never reads as a warning — it reads as light. A little
+   accent teal keeps it tied to the rest of the system rather than looking
+   bolted on. No new hues, and no colour that is not already a token.
+
+   Kept under 5%: at that strength it is a temperature rather than a shape.
+   Anything heavier starts to look like a gradient someone applied, which is
+   exactly what the design direction rules out.
+
+   Deliberately slow: 48s and 64s, out of phase, so the movement is felt rather
+   than watched. The base-layer prefers-reduced-motion rule already collapses
+   the animation for anyone who has asked for that, leaving the wash static.
+   ========================================================================== */
+
+@keyframes ambient-drift-a {
+  0%,
+  100% {
+    transform: translate3d(-8%, -6%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(7%, 8%, 0) scale(1.18);
+  }
+}
+
+@keyframes ambient-drift-b {
+  0%,
+  100% {
+    transform: translate3d(6%, 5%, 0) scale(1.12);
+  }
+  50% {
+    transform: translate3d(-7%, -6%, 0) scale(1);
+  }
+}
+
+@utility ambient-warm {
+  background-image: radial-gradient(
+    circle at center,
+    rgb(245 158 11 / 0.045),
+    transparent 66%
+  );
+  animation: ambient-drift-a 48s ease-in-out infinite;
+}
+
+@utility ambient-warm-soft {
+  background-image: radial-gradient(
+    circle at center,
+    rgb(245 158 11 / 0.03),
+    transparent 66%
+  );
+  animation: ambient-drift-b 64s ease-in-out infinite;
+}
+
+@utility ambient-cool {
+  background-image: radial-gradient(
+    circle at center,
+    rgb(0 217 163 / 0.025),
+    transparent 66%
+  );
+  animation: ambient-drift-b 56s ease-in-out infinite;
+}
 
 /* Faint engineering grid for the hero backdrop.
    Hairlines drawn in --border, radially masked so it fades out well before

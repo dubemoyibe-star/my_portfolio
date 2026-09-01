@@ -35,3 +35,16 @@ export function formatDateRange(range: DateRange): string {
   const end = range.end ? formatMonth(range.end) : "Present";
   return start === end ? start : `${start} — ${end}`;
 }
+
+/**
+ * `"https://stenion.vercel.app/"` -> `"stenion.vercel.app"`.
+ *
+ * For print, where a link is not clickable and the URL itself is the useful
+ * part. Protocol, `www.` and any trailing slash are noise on paper.
+ */
+export function formatUrl(url: string): string {
+  return url
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
+}
