@@ -315,6 +315,16 @@ export type Profile = {
   email: string;
   location?: string;
   avatar?: ImageAsset;
+  /**
+   * Alternate portrait for viewports below `lg`.
+   *
+   * Art direction, not a resolution fallback: the main portrait is landscape,
+   * and centre-cropping it into a small circle leaves the face too small to
+   * read. A tighter square crop solves that at phone sizes.
+   *
+   * Optional — without it the main avatar is used at every width.
+   */
+  avatarCompact?: ImageAsset;
   /** Whether you are open to work. Drives the status dot in the header. */
   availableForWork?: boolean;
   links: ContactLink[];
