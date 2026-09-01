@@ -6,9 +6,8 @@ import type { Project } from "@/types";
  * For work merged into repositories owned by other people, see
  * `@/data/contributions`.
  *
- * `images` is empty on every entry: no screenshots have been supplied yet. Any
- * UI built against this must handle the empty case rather than assuming a
- * cover image exists.
+ * Every entry carries one cover screenshot. The card still handles an empty
+ * `images` array — a future project may land before its screenshot does.
  */
 export const projects = [
   {
@@ -45,7 +44,15 @@ export const projects = [
       repo: "https://github.com/stenion-lab/stenion",
       live: "https://stenion.vercel.app/",
     },
-    images: [],
+    images: [
+      {
+        src: "/stenion-cover.png",
+        alt:
+          "Stenion landing page: a dark hero reading \"Audits are a snapshot. Risk moves every block\", above buttons to explore the registry and read the methodology.",
+        width: 1349,
+        height: 633,
+      },
+    ],
     featured: true,
     includeInResume: true,
     order: 1,
@@ -69,7 +76,15 @@ export const projects = [
       repo: "https://github.com/dubemoyibe-star/Dsuite",
       live: "https://dsuite-ruddy.vercel.app/",
     },
-    images: [],
+    images: [
+      {
+        src: "/dsuite-cover.png",
+        alt:
+          "Dsuite landing page: a photograph of a hotel suite behind the heading \"Book Comfortable Suites With Ease\", with Book Now and Learn More buttons.",
+        width: 1349,
+        height: 632,
+      },
+    ],
     featured: true,
     includeInResume: true,
     order: 2,
@@ -104,7 +119,15 @@ export const projects = [
       repo: "https://github.com/dubemoyibe-star/Crestwood",
       live: "https://crestwood-schools.vercel.app/",
     },
-    images: [],
+    images: [
+      {
+        src: "/crestwood-cover.png",
+        alt:
+          "CrestWood admin dashboard: a sidebar of school sections, counts for students, teachers, parents and admins, an attendance chart and a month calendar.",
+        width: 1350,
+        height: 632,
+      },
+    ],
     featured: true,
     includeInResume: true,
     order: 3,
@@ -138,7 +161,15 @@ export const projects = [
       repo: "https://github.com/dubemoyibe-star/bookshell",
       live: "https://bookshell-app.vercel.app/",
     },
-    images: [],
+    images: [
+      {
+        src: "/bookshell-cover.png",
+        alt:
+          "BookShell storefront: a \"Mindful Reading Experience\" hero with a search field for authors and titles, beside a 3D book illustration.",
+        width: 1346,
+        height: 633,
+      },
+    ],
     featured: true,
     includeInResume: true,
     order: 4,

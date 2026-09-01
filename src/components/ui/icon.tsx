@@ -12,6 +12,7 @@ import {
   siMongodb,
   siMysql,
   siNeon,
+  siNestjs,
   siNextdotjs,
   siNodedotjs,
   siPostgresql,
@@ -19,6 +20,7 @@ import {
   siPython,
   siRailway,
   siReact,
+  siRedis,
   siRender,
   siRust,
   siSolidity,
@@ -131,6 +133,11 @@ const ICONS: Record<string, IconEntry> = {
   prisma: entry(siPrisma),
   firebase: entry(siFirebase),
   clerk: entry(siClerk),
+
+  /* Referenced only by free-form contribution tech labels — see
+     lib/tech-labels.ts, which maps those labels onto these slugs. */
+  nestjs: entry(siNestjs),
+  redis: entry(siRedis),
 
   /* Databases */
   mysql: entry(siMysql),

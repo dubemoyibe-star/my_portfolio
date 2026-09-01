@@ -25,6 +25,21 @@ export type MobileNavProps = {
  */
 export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
   const [open, setOpen] = useState(false);
+  /**
+   * Anchor to scroll to once the overlay has closed.
+   *
+   * Tapping a section link cannot just let the browser follow the href: the
+   * overlay locks `body { overflow: hidden }`, and the default anchor scroll
+   * runs before React has re-rendered and released that lock, so the scroll is
+   * swallowed and the page never moves. The scroll is therefore performed by
+   * the lock effect's own cleanup, immediately after the lock comes off.
+   *
+   * A ref rather than state: this is a one-shot instruction to the cleanup,
+   * and nothing renders from it.
+   */
+  const pendingHashRef = useRef<string | null>(null);
+
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -45,12 +60,51 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
     return () => {
       document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKeyDown);
+
+      const hash = pendingHashRef.current;
+      pendingHashRef.current = null;
+      if (!hash) return;
+
+      const target = document.querySelector(hash);
+      if (!target) return;
+
+      /* One frame after the unlock, so the scroll runs against a page that can
+         actually move. No `behavior` option: this inherits `scroll-behavior`
+         from the stylesheet, which the reduced-motion block already switches to
+         `auto`, and it honours the sections' `scroll-mt-16` so nothing lands
+         underneath the sticky header. */
+      requestAnimationFrame(() => {
+        target.scrollIntoView();
+        window.history.replaceState(null, "", hash);
+      });
     };
   }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const handleNavClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    /* Real routes keep client-side navigation; only same-page anchors are
+       intercepted, and `querySelector` is only ever handed a valid selector. */
+    if (!href.startsWith("#")) {
+      setOpen(false);
+      return;
+    }
+
+    event.preventDefault();
+    pendingHashRef.current = href;
+    setOpen(false);
+  };
 
   return (
     <div>
       <button
+        ref={triggerRef}
         type="button"
         aria-label="Open menu"
         aria-expanded={open}
@@ -75,7 +129,7 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
             ref={closeRef}
             type="button"
             aria-label="Close menu"
-            onClick={() => setOpen(false)}
+            onClick={close}
             className="flex size-10 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-border-strong hover:text-foreground"
           >
             <svg
@@ -100,13 +154,10 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      onClick={() => setOpen(false)}
+                      onClick={(event) => handleNavClick(event, item.href)}
                       className="flex items-center gap-4 py-3 text-h3 text-foreground transition-colors hover:text-link"
                     >
-                      <span
-                        aria-hidden="true"
-                        className="h-px w-6 bg-accent transition-[width] duration-200"
-                      />
+                      <span aria-hidden="true" className="h-px w-6 bg-accent" />
                       {item.label}
                     </Link>
                   </li>
