@@ -13,7 +13,7 @@ export const profile = {
 
   bio: {
     short:
-      "I'm a fullstack and blockchain developer from Nigeria. I like solving real problems, not just writing code for the sake of it, and I'm most interested in building applications that people actually use instead of portfolio pieces.",
+      "I'm a fullstack and blockchain developer from Nigeria. I like solving real problems, not just writing code for the sake of it, and I'm most interested in building applications that people actually use.",
     long: [
       "I'm a fullstack and blockchain developer from Nigeria. I like solving real problems, not just writing code for the sake of it, and I'm most interested in building applications that people actually use instead of portfolio pieces.",
       "I'm continuously learning while shipping, with a growing focus on Web3 and decentralized technologies. Open source matters to me. I contribute where I can and prefer building in the open over building in isolation.",
@@ -24,6 +24,26 @@ export const profile = {
   email: "dubemoyibe@gmail.com",
   location: "Nigeria",
   availableForWork: true,
+
+  /* 1280x854. Landscape, so the hero's circular frame center-crops it to a
+     square — the subject is centred horizontally, which is what makes that
+     safe. The 854px short edge is the real limit on how large the portrait
+     can render sharply. */
+  avatar: {
+    src: "/profile.jpg",
+    alt: "Portrait of Oyibe Chidubem",
+    width: 1280,
+    height: 854,
+  },
+
+  /* Tighter square crop, used below lg. The landscape original loses the face
+     when squeezed into a small circle. */
+  avatarCompact: {
+    src: "/profile_small.jpeg",
+    alt: "Portrait of Oyibe Chidubem",
+    width: 200,
+    height: 200,
+  },
 
   links: [
     {
@@ -51,6 +71,13 @@ export const profile = {
       href: "https://t.me/oyibe_dev",
       icon: "telegram",
       handle: "@oyibe_dev",
+    },
+    {
+      label: "WhatsApp",
+      /* wa.me wants the full international number, digits only. */
+      href: "https://wa.me/2347026137565",
+      icon: "whatsapp",
+      handle: "+234 702 613 7565",
     },
   ],
 

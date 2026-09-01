@@ -143,6 +143,19 @@
      for instead of hardcoding durations inline. */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* --- Glow ---------------------------------------------------------------
+     Reserved for genuinely interactive elements on hover/focus: buttons and
+     links, never static decoration. Each is a hairline ring plus a tight,
+     heavily-negative-spread bloom — enough to read as "live" on a dark ground
+     without becoming the neon wash the design direction rules out.
+
+     No new hues: these are alpha variants of --accent and --link.
+     Accent = actions. Link = navigation. */
+  --shadow-glow-accent:
+    0 0 0 1px rgb(0 217 163 / 0.3), 0 0 22px -6px rgb(0 217 163 / 0.45);
+  --shadow-glow-link:
+    0 0 0 1px rgb(59 130 246 / 0.35), 0 0 22px -6px rgb(59 130 246 / 0.5);
 }
 
 /* ==========================================================================
@@ -234,9 +247,23 @@
     color: var(--muted);
   }
 
+  /* Pre-animation state for <Reveal> children.
+     Set in CSS, not in the effect: an effect only runs after hydration, so
+     setting it there would let the content paint and then blink out. Anything
+     that stops GSAP from running must restore this — see the reduced-motion
+     rule below and the <noscript> block in the root layout. */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
+    }
+    [data-reveal] {
+      opacity: 1;
+      transform: none;
     }
     *,
     *::before,
@@ -251,6 +278,28 @@
 /* ==========================================================================
    UTILITIES
    ========================================================================== */
+
+/* Faint engineering grid for the hero backdrop.
+   Hairlines drawn in --border, radially masked so it fades out well before
+   the edges and never competes with text. This is structure, not decoration:
+   no colour gradient, no hue that is not already a token. Delete this one
+   class from the hero if the page reads better without it. */
+@utility grid-backdrop {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 55% at 25% 35%,
+    #000 0%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 55% at 25% 35%,
+    #000 0%,
+    transparent 78%
+  );
+}
 
 /* Mono eyebrow / status label. The one shorthand worth defining up front:
    it recurs on every section header in this kind of layout. */

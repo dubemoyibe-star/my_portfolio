@@ -17,12 +17,11 @@ export const siteConfig: SiteConfig = {
   description: profile.bio.short,
   url: "https://example.com",
 
-  nav: [
-    { label: "Work", href: "/work" },
-    { label: "About", href: "/about" },
-    { label: "Writing", href: "/writing" },
-    { label: "Contact", href: "/contact" },
-  ],
+  /* Grows as sections land. Projects, Contributions and the CV link are added
+     in the later UI passes; only anchors that exist are listed, so the header
+     never offers a dead link. */
+  nav: [{ label: "Stack", href: "#stack" }],
 
-  social: profile.links.filter((link) => link.primary),
+  /* All of them. `primary` still marks the two worth showing in tight spots. */
+  social: profile.links,
 };
