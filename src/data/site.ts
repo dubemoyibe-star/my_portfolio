@@ -1,18 +1,20 @@
 import type { SiteConfig } from "@/types";
 
+import { profile } from "@/data/profile";
+
 /**
- * Static site configuration.
+ * Site chrome: navigation, canonical URL, and the metadata defaults.
  *
- * This is the seam for the admin panel: today it is a hardcoded object, later
- * it becomes a fetch. Components must import `siteConfig` rather than reading
- * these strings inline, so swapping the source stays a one-file change.
+ * Everything about the *person* is derived from `profile` rather than repeated
+ * here — one record owns the name, the role and the social links, so the header,
+ * the footer, the CV and the OpenGraph tags cannot disagree about them.
  *
- * All values below are placeholders.
+ * What stays local to this file is genuinely site-level: routes and the domain.
  */
 export const siteConfig: SiteConfig = {
-  name: "Your Name",
-  role: "Placeholder role",
-  description: "Placeholder description for the portfolio site.",
+  name: profile.name,
+  role: profile.resume.title,
+  description: profile.bio.short,
   url: "https://example.com",
 
   nav: [
@@ -22,9 +24,5 @@ export const siteConfig: SiteConfig = {
     { label: "Contact", href: "/contact" },
   ],
 
-  social: [
-    { label: "GitHub", href: "https://github.com", icon: "github" },
-    { label: "LinkedIn", href: "https://linkedin.com", icon: "linkedin" },
-    { label: "Email", href: "mailto:hello@example.com", icon: "mail" },
-  ],
+  social: profile.links.filter((link) => link.primary),
 };
