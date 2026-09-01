@@ -11,7 +11,7 @@ import { siteConfig } from "@/data/site";
  */
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-border">
+    <footer className="relative z-10 mt-auto border-t border-border print:hidden">
       <Container className="flex flex-col gap-6 py-10 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-mono text-label text-muted">
           &copy; {new Date().getFullYear()} {siteConfig.name}

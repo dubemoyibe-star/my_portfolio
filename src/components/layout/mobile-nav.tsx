@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { DownloadIcon } from "@/components/ui/download-icon";
 import { Icon } from "@/components/ui/icon";
+import { sameDocumentHash } from "@/lib/nav";
 import type { ContactLink, NavItem } from "@/types";
 
 export type MobileNavProps = {
@@ -14,38 +17,48 @@ export type MobileNavProps = {
 };
 
 /**
- * Hamburger opening a full-screen overlay.
- *
- * A bottom bar would suit an app with persistent destinations; this is one
- * scrolling page of anchors, so an overlay gives large touch targets without
- * permanently spending vertical space on a phone.
+ * Hamburger opening a drop-down panel below the header.
  *
  * Props are plain data so the server component above can pass content straight
  * through — this file is the only part of the header that ships to the browser.
+ *
+ * The panel is portalled to `document.body`, and that is load-bearing rather
+ * than tidiness: the header carries `backdrop-blur`, and per the Filter Effects
+ * spec any element with a `backdrop-filter` becomes the containing block for
+ * its `position: fixed` descendants. Rendered in place, the panel would resolve
+ * against the 64px header instead of the viewport and open as a clipped strip.
+ *
+ * It is mounted only while open, so nothing touches `document` during SSR and
+ * no mount flag is needed.
+ *
+ * Three ways out, which is why there is no separate close button: the scrim,
+ * Escape, and the trigger itself, which toggles.
  */
 export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
   /**
-   * Anchor to scroll to once the overlay has closed.
+   * Anchor to scroll to once the panel has closed.
    *
    * Tapping a section link cannot just let the browser follow the href: the
-   * overlay locks `body { overflow: hidden }`, and the default anchor scroll
-   * runs before React has re-rendered and released that lock, so the scroll is
+   * panel locks `body { overflow: hidden }`, and the default anchor scroll runs
+   * before React has re-rendered and released that lock, so the scroll is
    * swallowed and the page never moves. The scroll is therefore performed by
    * the lock effect's own cleanup, immediately after the lock comes off.
    *
-   * A ref rather than state: this is a one-shot instruction to the cleanup,
-   * and nothing renders from it.
+   * A ref rather than state: this is a one-shot instruction to the cleanup, and
+   * nothing renders from it.
    */
   const pendingHashRef = useRef<string | null>(null);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
 
-    /* Stop the page behind the overlay from scrolling. */
+    /* Stop the page behind the panel from scrolling. */
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -54,8 +67,8 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
     };
     document.addEventListener("keydown", onKeyDown);
 
-    /* Move focus into the overlay so the keyboard is not left behind it. */
-    closeRef.current?.focus();
+    /* Move focus into the panel so the keyboard is not left behind it. */
+    panelRef.current?.focus();
 
     return () => {
       document.body.style.overflow = previous;
@@ -89,15 +102,23 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
     event: React.MouseEvent<HTMLAnchorElement>,
     href: string,
   ) => {
-    /* Real routes keep client-side navigation; only same-page anchors are
-       intercepted, and `querySelector` is only ever handed a valid selector. */
-    if (!href.startsWith("#")) {
+    const hash = sameDocumentHash(href, pathname);
+
+    /* Pointing at another route — from /cv back to a section on /.
+     *
+     * This cannot be left to the browser's default action. Closing the panel
+     * unmounts the portal, and with it this very anchor; a link removed from
+     * the DOM during its own click handler has its navigation cancelled, so
+     * the tap appears to do nothing at all. Navigate explicitly instead. */
+    if (!hash) {
+      event.preventDefault();
       setOpen(false);
+      window.location.assign(href);
       return;
     }
 
     event.preventDefault();
-    pendingHashRef.current = href;
+    pendingHashRef.current = hash;
     setOpen(false);
   };
 
@@ -106,10 +127,10 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
       <button
         ref={triggerRef}
         type="button"
-        aria-label="Open menu"
+        aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls="mobile-nav"
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen((value) => !value)}
         className="flex size-10 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-border-strong hover:text-foreground"
       >
         <span aria-hidden="true" className="flex flex-col gap-[5px]">
@@ -118,84 +139,83 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
         </span>
       </button>
 
-      <div
-        id="mobile-nav"
-        hidden={!open}
-        className="fixed inset-0 z-100 flex flex-col bg-background"
-      >
-        <div className="flex h-16 items-center justify-between border-b border-border px-5">
-          <span className="label text-muted">Menu</span>
-          <button
-            ref={closeRef}
-            type="button"
-            aria-label="Close menu"
-            onClick={close}
-            className="flex size-10 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-border-strong hover:text-foreground"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="size-4.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-            >
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        </div>
+      {open
+        ? createPortal(
+            <>
+              {/* Scrim sits below the header's z-50, so the trigger stays lit
+                  and clickable — tapping it again is one of the ways out. */}
+              <div
+                aria-hidden="true"
+                onClick={close}
+                className="fixed inset-0 z-40 bg-overlay"
+              />
 
-        <div className="flex flex-1 flex-col justify-between gap-10 overflow-y-auto px-5 py-10">
-          {nav.length > 0 ? (
-            <nav aria-label="Primary">
-              <ul className="flex flex-col gap-1">
-                {nav.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={(event) => handleNavClick(event, item.href)}
-                      className="flex items-center gap-4 py-3 text-h3 text-foreground transition-colors hover:text-link"
-                    >
-                      <span aria-hidden="true" className="h-px w-6 bg-accent" />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ) : null}
+              <div
+                id="mobile-nav"
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu"
+                tabIndex={-1}
+                className="fixed inset-x-4 top-[4.5rem] z-50 max-h-[calc(100svh-6rem)] overflow-y-auto rounded-lg border border-border bg-surface p-5 shadow-2xl outline-none"
+              >
+                {nav.length > 0 ? (
+                  <nav aria-label="Primary">
+                    <ul className="flex flex-col">
+                      {nav.map((item) => (
+                        <li key={item.href}>
+                          <a
+                            href={item.href}
+                            onClick={(event) =>
+                              handleNavClick(event, item.href)
+                            }
+                            className="flex items-center gap-3 py-3 text-foreground transition-colors hover:text-link"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="h-px w-4 bg-accent"
+                            />
+                            {item.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                ) : null}
 
-          <div className="flex flex-col gap-6">
-            <Link
-              href={cvHref}
-              onClick={() => setOpen(false)}
-              className="flex h-12 items-center justify-center gap-2 rounded-md bg-accent px-5 text-small font-medium text-background"
-            >
-              <DownloadIcon />
-              Download CV
-            </Link>
+                <div className="mt-4 flex flex-col gap-4 border-t border-border pt-5">
+                  <Link
+                    href={cvHref}
+                    onClick={() => setOpen(false)}
+                    className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 text-small font-medium text-background"
+                  >
+                    <DownloadIcon />
+                    Download CV
+                  </Link>
 
-            {links.length > 0 ? (
-              <ul className="flex flex-wrap items-center gap-3">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      aria-label={link.label}
-                      className="flex size-11 items-center justify-center rounded-md border border-border bg-surface text-foreground transition-colors hover:border-link/50"
-                    >
-                      <Icon name={link.icon} brand />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        </div>
-      </div>
+                  {links.length > 0 ? (
+                    <ul className="flex flex-wrap items-center gap-2">
+                      {links.map((link) => (
+                        <li key={link.href}>
+                          <a
+                            href={link.href}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            aria-label={link.label}
+                            className="flex size-10 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:border-link/50"
+                          >
+                            <Icon name={link.icon} brand />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

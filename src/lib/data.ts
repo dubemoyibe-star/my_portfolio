@@ -1,12 +1,20 @@
 import { contributions as contributionsSeed } from "@/data/contributions";
+import {
+  certificatesUrl,
+  certifications as certificationsSeed,
+  education as educationSeed,
+  educationNote,
+} from "@/data/education";
 import { experience as experienceSeed } from "@/data/experience";
 import { profile as profileSeed } from "@/data/profile";
 import { projects as projectsSeed } from "@/data/projects";
 import { techStack as techSeed } from "@/data/tech";
 import {
   TECH_CATEGORIES,
+  type Certification,
   type Contribution,
   type DateRange,
+  type Education,
   type Experience,
   type Profile,
   type Project,
@@ -57,6 +65,14 @@ async function readTechStack(): Promise<TechStackItem[]> {
 
 async function readContributions(): Promise<Contribution[]> {
   return contributionsSeed;
+}
+
+async function readEducation(): Promise<Education[]> {
+  return educationSeed;
+}
+
+async function readCertifications(): Promise<Certification[]> {
+  return certificationsSeed;
 }
 
 /* ==========================================================================
@@ -303,6 +319,32 @@ export async function getContributionSlugs(): Promise<string[]> {
 }
 
 /* ==========================================================================
+   Education and certifications
+   ========================================================================== */
+
+/** Formal education, most recent first. */
+export async function getEducation(): Promise<Education[]> {
+  return (await readEducation()).slice().sort(byRecencyDesc);
+}
+
+/** Supporting line shown under the education entries, on site and on the CV. */
+export async function getEducationNote(): Promise<string> {
+  return educationNote;
+}
+
+/** Issuer profile listing every certificate. */
+export async function getCertificatesUrl(): Promise<string> {
+  return certificatesUrl;
+}
+
+/** Certifications, most recently earned first. */
+export async function getCertifications(): Promise<Certification[]> {
+  return (await readCertifications())
+    .slice()
+    .sort((a, b) => b.dateEarned.localeCompare(a.dateEarned));
+}
+
+/* ==========================================================================
    Resume aggregate
    ========================================================================== */
 
@@ -319,21 +361,39 @@ export async function getContributionSlugs(): Promise<string[]> {
  * role later needs no change here.
  */
 export async function getResumeData(): Promise<ResumeData> {
-  const [profile, experience, projects, contributions, featuredTech] =
-    await Promise.all([
-      getProfile(),
-      getExperience({ includeInResume: true }),
-      getProjects({ includeInResume: true }),
-      getContributions({ includeInResume: true }),
-      getTechStack({ featured: true }),
-    ]);
+  const [
+    profile,
+    experience,
+    projects,
+    contributions,
+    featuredTech,
+    education,
+    certifications,
+  ] = await Promise.all([
+    getProfile(),
+    getExperience({ includeInResume: true }),
+    getProjects({ includeInResume: true }),
+    getContributions({ includeInResume: true }),
+    getTechStack({ featured: true }),
+    getEducation(),
+    getCertifications(),
+  ]);
 
   const skills = TECH_CATEGORIES.map((category) => ({
     category,
     items: featuredTech.filter((item) => item.category === category),
   })).filter((group) => group.items.length > 0);
 
-  return { profile, experience, projects, contributions, skills };
+  return {
+    profile,
+    experience,
+    projects,
+    contributions,
+    skills,
+    education,
+    educationNote,
+    certifications,
+  };
 }
 
 /* ==========================================================================
@@ -353,12 +413,15 @@ export async function getResumeData(): Promise<ResumeData> {
  * there for different reasons.
  */
 export async function validateContent(): Promise<string[]> {
-  const [projects, experience, tech, contributions] = await Promise.all([
-    readProjects(),
-    readExperience(),
-    readTechStack(),
-    readContributions(),
-  ]);
+  const [projects, experience, tech, contributions, education, certifications] =
+    await Promise.all([
+      readProjects(),
+      readExperience(),
+      readTechStack(),
+      readContributions(),
+      readEducation(),
+      readCertifications(),
+    ]);
 
   const issues: string[] = [];
   const knownTech = new Set(tech.map((item) => item.id));
@@ -377,6 +440,8 @@ export async function validateContent(): Promise<string[]> {
   flagDuplicates("experience id", experience.map((entry) => entry.id));
   flagDuplicates("experience slug", experience.map((entry) => entry.slug));
   flagDuplicates("contribution id", contributions.map((entry) => entry.id));
+  flagDuplicates("education id", education.map((entry) => entry.id));
+  flagDuplicates("certification id", certifications.map((entry) => entry.id));
   flagDuplicates("contribution slug", contributions.map((entry) => entry.slug));
 
   /* Contributions carry free-form tech labels, so there is no id resolution to
@@ -400,6 +465,15 @@ export async function validateContent(): Promise<string[]> {
       issues.push(`${label} has an end date before its start date`);
     }
   };
+
+  for (const entry of education) {
+    if (entry.dates.end !== null && entry.dates.end < entry.dates.start) {
+      issues.push(`Education "${entry.id}" has an end date before its start date`);
+    }
+    if (entry.status === "completed" && entry.dates.end === null) {
+      issues.push(`Education "${entry.id}" is marked completed but has no end date`);
+    }
+  }
 
   for (const project of projects) checkEntry(`Project "${project.slug}"`, project);
   for (const entry of experience) checkEntry(`Experience "${entry.slug}"`, entry);

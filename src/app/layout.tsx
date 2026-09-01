@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
+import { Ambience } from "@/components/layout/ambience";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { siteConfig } from "@/data/site";
@@ -47,11 +48,13 @@ export default function RootLayout({
           Skip to content
         </a>
 
+        <Ambience />
+
         <SiteHeader />
 
         {/* Single content wrapper. Pages own their own sections and spacing;
             this only guarantees the footer stays pinned to the bottom. */}
-        <main id="main" className="flex-1">
+        <main id="main" className="relative z-10 flex-1">
           {children}
         </main>
 

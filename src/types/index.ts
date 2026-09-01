@@ -265,6 +265,47 @@ export type Contribution = {
 };
 
 /* ==========================================================================
+   Education and certifications
+   ========================================================================== */
+
+export const EDUCATION_STATUSES = ["in-progress", "completed"] as const;
+
+export type EducationStatus = (typeof EDUCATION_STATUSES)[number];
+
+export type Education = {
+  id: string;
+  institution: string;
+  fieldOfStudy: string;
+  status: EducationStatus;
+  /** `end` is `null` while still enrolled. */
+  dates: DateRange;
+};
+
+export type Certification = {
+  id: string;
+  title: string;
+  /** Issuer as a reader would name it: "Scrimba". */
+  platform: string;
+  /**
+   * What the course covered, one or two sentences.
+   *
+   * Optional: a certificate can be listed before its summary is written, and
+   * the card simply closes up rather than showing invented copy.
+   */
+  description?: string;
+  /**
+   * Certificate image.
+   *
+   * Optional: a certification can land before its scan does, and the card
+   * falls back to a typographic placeholder rather than a broken frame.
+   */
+  imageUrl?: string;
+  /** Where the credential can be verified or viewed. */
+  credentialUrl: string;
+  dateEarned: ISODate;
+};
+
+/* ==========================================================================
    Profile
    ========================================================================== */
 
@@ -356,6 +397,14 @@ export type ResumeData = {
   contributions: Contribution[];
   /** Featured tech only, grouped by category, in `TECH_CATEGORIES` order. */
   skills: { category: TechCategory; items: TechStackItem[] }[];
+  education: Education[];
+  /** Supporting line rendered under the education entries. */
+  educationNote: string;
+  /**
+   * Present so the CV can count them and link out. The CV deliberately does
+   * not print certificate details; the home page's Education section does.
+   */
+  certifications: Certification[];
 };
 
 /* ==========================================================================
