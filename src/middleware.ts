@@ -24,9 +24,19 @@ export async function middleware(request: NextRequest) {
 
   if (PUBLIC_ADMIN_ROUTES.has(pathname)) return NextResponse.next();
 
-  const isAuthenticated = await verifySessionToken(
-    request.cookies.get(SESSION_COOKIE)?.value,
-  );
+  /* `verifySessionToken` throws when `ADMIN_SESSION_SECRET` is missing, which
+     is a misconfigured deployment rather than a rejected visitor. Letting it
+     escape would surface an unhandled middleware error page on every admin
+     route; catching it here fails closed instead — nobody gets in, and the
+     login form is where they land to be told why. */
+  let isAuthenticated = false;
+  try {
+    isAuthenticated = await verifySessionToken(
+      request.cookies.get(SESSION_COOKIE)?.value,
+    );
+  } catch (error) {
+    console.error("[admin] session check is misconfigured:", error);
+  }
   if (isAuthenticated) return NextResponse.next();
 
   /* API routes get a status code; a redirect to an HTML login page would be

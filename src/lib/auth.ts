@@ -26,13 +26,25 @@
  *
  * ## What this is not
  *
- * Not rate-limited, and not multi-user. Both are fine at one user with a strong
- * password on an HTTPS-only cookie; neither would be fine if this grew a second
- * account. Revisit if it ever does.
+ * Not multi-user, and not stateful. There is no session store, so a token
+ * cannot be revoked individually — rotating `ADMIN_SESSION_SECRET` revokes all
+ * of them at once, which is the only revocation a one-person system needs.
+ *
+ * Throttling of failed logins lives in `@/lib/login-throttle`, not here: this
+ * module runs in the edge middleware on every admin request, and the counter
+ * only ever needs to be consulted by the one route that checks passwords.
  */
 
-/** How long a session lasts before the password is required again. */
-const SESSION_DURATION_SECONDS = 60 * 60 * 12; // 12 hours
+/**
+ * How long a session lasts before the password is required again.
+ *
+ * Seven days. Long enough that editing content over a week does not turn into
+ * a login ritual, short enough that a cookie left on a borrowed machine stops
+ * working on its own. Shortening this is the cheapest security dial here;
+ * rotating `ADMIN_SESSION_SECRET` is the emergency one, since it invalidates
+ * every outstanding session immediately.
+ */
+const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 export const SESSION_COOKIE = "portfolio_admin_session";
 
