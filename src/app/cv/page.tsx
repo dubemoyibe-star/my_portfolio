@@ -7,11 +7,25 @@ import { CvDownload } from "@/components/cv/cv-download";
 import { getCertificatesUrl, getProfile, getResumeData } from "@/lib/data";
 import { formatDateRange, formatUrl } from "@/lib/format";
 import { groupTech } from "@/lib/tech-groups";
+import { ogImages, pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
 
-export const metadata: Metadata = {
-  title: "CV",
-};
+/**
+ * The description is `profile.resume.summary` verbatim. That is the formal
+ * register the CV itself speaks in — written for someone assessing the work
+ * rather than browsing it — which is exactly the framing a search result or a
+ * shared link to this page wants.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await getProfile();
+
+  return pageMetadata({
+    title: "Oyibe Chidubem — CV / Resume",
+    description: profile.resume.summary,
+    path: "/cv",
+    image: ogImages.cv,
+  });
+}
 
 /**
  * The CV, assembled from `getResumeData()`.
