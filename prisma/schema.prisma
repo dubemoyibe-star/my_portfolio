@@ -64,6 +64,13 @@ model TechStackItem {
   projects    ProjectTech[]
   experiences ExperienceTech[]
 
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([category])
   @@index([featured])
   @@map("tech_stack_items")
@@ -107,6 +114,13 @@ model Project {
 
   tech   ProjectTech[]
   images ProjectImage[]
+
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([featured])
   @@index([includeInResume])
@@ -180,6 +194,13 @@ model Experience {
 
   tech ExperienceTech[]
 
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([includeInResume])
   @@map("experiences")
 }
@@ -230,6 +251,13 @@ model Contribution {
 
   prLinks PrLink[]
 
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([featured])
   @@index([includeInResume])
   @@map("contributions")
@@ -275,6 +303,13 @@ model Education {
   /// `src/lib/data.ts`.
   position Int @default(0)
 
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([position])
   @@map("education")
 }
@@ -295,6 +330,13 @@ model Certification {
   /// share `dateEarned: "2026-09"`, and without a stable tie-break the
   /// Education section would reorder them between deploys.
   position Int @default(0)
+
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([dateEarned])
   @@map("certifications")
@@ -347,6 +389,13 @@ model Profile {
   resumeUpdatedAt String
 
   links ContactLink[]
+
+  /// Row lifecycle. Not part of the domain types and never returned from
+  /// `src/lib/data.ts` — the public site has no use for them. They exist for
+  /// the admin panel, whose list views answer "what did I touch last", a
+  /// question nothing in the content model itself records.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("profile")
 }
