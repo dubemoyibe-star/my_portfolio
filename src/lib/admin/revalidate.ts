@@ -32,4 +32,7 @@ export function revalidatePublicContent(): void {
   revalidatePath("/cv");
   /* `sitemap.ts` derives its last-modified date from the profile row. */
   revalidatePath("/sitemap.xml");
+  /* `llms.txt` is the whole content set in plain text, and is `force-static` —
+     without this it would serve the build's copy until the next deploy. */
+  revalidatePath("/llms.txt");
 }
