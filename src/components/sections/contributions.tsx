@@ -1,5 +1,6 @@
 import { ContributionEntry } from "@/components/cards/contribution-entry";
 import { Section } from "@/components/layout/section";
+import { ShowMore } from "@/components/ui/show-more";
 import { getContributions } from "@/lib/data";
 
 /**
@@ -13,6 +14,11 @@ import { getContributions } from "@/lib/data";
  *
  * Order is the curated `order` field, untouched — `getContributions()` sorts by
  * it and falls back to `mergedDate` only as a tiebreak.
+ *
+ * Capped at six with `ShowMore`, for the same reason the Projects grid is: the
+ * rail is one entry per row and grows without limit. The container stays an
+ * `<ol>` and the entries stay `<li>`s, so hiding the overflow does not cost the
+ * list its semantics — hence `itemDisplay="list-item"`.
  */
 export async function Contributions() {
   const contributions = await getContributions();
@@ -26,14 +32,14 @@ export async function Contributions() {
       title="Open source contributions"
       description="Work merged into projects I don't own: what the repository does, and what I actually changed in it."
     >
-      <ol>
+      <ShowMore as="ol" noun="contributions" itemDisplay="list-item">
         {contributions.map((contribution) => (
           <ContributionEntry
             key={contribution.id}
             contribution={contribution}
           />
         ))}
-      </ol>
+      </ShowMore>
     </Section>
   );
 }

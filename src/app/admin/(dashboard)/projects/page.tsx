@@ -10,6 +10,7 @@ import {
   buttonPrimary,
 } from "@/components/admin/chrome";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
+import { formatStamp } from "@/lib/admin/format";
 import { PROJECT_STATUS_LABELS } from "@/lib/admin/project-input";
 import { formatDateRange } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -36,24 +37,6 @@ import { deleteProject } from "./actions";
 export const metadata: Metadata = {
   title: "Projects",
 };
-
-/** `2026-08-31T09:12:44Z` -> `31 Aug 2026`. */
-const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-/**
- * Formatted in UTC, on the server, once.
- *
- * `toLocaleDateString` would read the *server's* locale and timezone, which is
- * neither the operator's nor stable between a local dev machine and a
- * serverless region. The exact instant is in the `title` attribute for anyone
- * who needs more than the day.
- */
-function formatStamp(value: Date): string {
-  return `${value.getUTCDate()} ${MONTHS[value.getUTCMonth()]} ${value.getUTCFullYear()}`;
-}
 
 export default async function AdminProjectsPage() {
   const rows = await prisma.project.findMany({

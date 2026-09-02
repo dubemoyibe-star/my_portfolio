@@ -255,18 +255,35 @@ export function Banner({ tone, children, className }: BannerProps) {
  * `accent` is spent here on `featured` alone. It is the flag that changes what
  * the public site puts at the top of the page, so it is the one worth being
  * able to spot without reading.
+ *
+ * ## `preserveCase`
+ *
+ * The default treatment is the `label` utility, which uppercases — right for
+ * the fixed vocabulary of flags and statuses this was built for. It is wrong
+ * the moment a chip holds content rather than a label: a contribution's tech
+ * tags are proper nouns whose capitalisation is the point, and "BullMQ",
+ * "PostgreSQL" and "Node.js" come out of an uppercase transform as "BULLMQ",
+ * "POSTGRESQL" and "NODE.JS" — harder to read, and no longer the strings that
+ * were actually typed in. Those chips opt out and keep the size and tracking
+ * without the transform.
  */
 export function Chip({
   tone = "neutral",
+  preserveCase = false,
   children,
 }: {
   tone?: "neutral" | "accent" | "warning" | "link";
+  /** Keep the content's own capitalisation. For data, not for labels. */
+  preserveCase?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <span
       className={cn(
-        "label inline-flex items-center gap-1 whitespace-nowrap rounded border px-1.5 py-0.5",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded border px-1.5 py-0.5",
+        preserveCase
+          ? "font-mono text-label leading-[1.4] tracking-[0.02em]"
+          : "label",
         tone === "accent" && "border-accent/30 bg-accent-subtle text-accent",
         tone === "warning" && "border-warning/30 bg-warning-subtle text-warning",
         tone === "link" && "border-link/30 bg-link-subtle text-link",

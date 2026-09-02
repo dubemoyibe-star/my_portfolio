@@ -1,5 +1,6 @@
 import { ProjectCard } from "@/components/cards/project-card";
 import { Section } from "@/components/layout/section";
+import { ShowMore } from "@/components/ui/show-more";
 import { getProjects, getTechIndex } from "@/lib/data";
 
 /**
@@ -11,6 +12,10 @@ import { getProjects, getTechIndex } from "@/lib/data";
  *
  * The tech index is fetched once and shared across every card rather than each
  * card resolving its own ids — the same reason `getTechIndex()` exists.
+ *
+ * Capped at six with `ShowMore`. Every project is still rendered and served —
+ * see that component for why the overflow is hidden rather than sliced away.
+ * `itemDisplay` is `flex` because that is what `ProjectCard`'s `<article>` is.
  */
 export async function Projects() {
   const [projects, techIndex] = await Promise.all([
@@ -22,7 +27,11 @@ export async function Projects() {
 
   return (
     <Section id="projects" eyebrow="Projects" title="Things I've built">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <ShowMore
+        noun="projects"
+        itemDisplay="flex"
+        className="grid gap-6 lg:grid-cols-2"
+      >
         {projects.map((project) => (
           <ProjectCard
             key={project.id}
@@ -32,7 +41,7 @@ export async function Projects() {
               .filter((item) => Boolean(item))}
           />
         ))}
-      </div>
+      </ShowMore>
     </Section>
   );
 }
