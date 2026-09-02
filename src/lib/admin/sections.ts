@@ -40,7 +40,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     description:
       "Merged work in repositories you do not own, with their PR links.",
     countLabel: "contributions",
-    ready: false,
+    ready: true,
   },
   {
     href: "/admin/tech-stack",
