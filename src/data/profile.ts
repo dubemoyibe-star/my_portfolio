@@ -1,6 +1,25 @@
 import type { Profile } from "@/types";
 
 /**
+ * REFERENCE ONLY — NO LONGER THE LIVE SOURCE.
+ *
+ * Content is served from Postgres (Neon) via Prisma. `@/lib/data` reads the
+ * database; nothing in the running app imports this file except `@/data/site`, which still reads `name`,
+ * `resume.title` and `bio.short` from here to build the static site metadata.
+ *
+ * It is kept for two reasons:
+ *
+ *  - It is the input to `prisma/seed.ts`. `npm run db:seed` reads this file and
+ *    writes it into the database, replacing whatever is there.
+ *  - It is the rollback path if the database is lost or a migration goes wrong.
+ *
+ * **Editing this file changes nothing on the site.** It takes effect only when
+ * the seed is re-run — and re-running the seed overwrites anything edited
+ * through the admin panel. Change live content in the admin panel; change this
+ * file only to move the rollback baseline.
+ */
+
+/**
  * The person behind the site.
  *
  * Note the split between `tagline`/`bio` and `resume`: the site speaks in first

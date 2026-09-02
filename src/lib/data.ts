@@ -1,78 +1,409 @@
-import { contributions as contributionsSeed } from "@/data/contributions";
-import {
-  certificatesUrl,
-  certifications as certificationsSeed,
-  education as educationSeed,
-  educationNote,
-} from "@/data/education";
-import { experience as experienceSeed } from "@/data/experience";
-import { profile as profileSeed } from "@/data/profile";
-import { projects as projectsSeed } from "@/data/projects";
-import { techStack as techSeed } from "@/data/tech";
+import type { Prisma } from "@prisma/client";
+
+import { prisma } from "@/lib/prisma";
 import {
   TECH_CATEGORIES,
   type Certification,
+  type ContactLink,
   type Contribution,
   type DateRange,
   type Education,
+  type EducationStatus,
+  type EmploymentType,
   type Experience,
+  type ImageAsset,
+  type PrLink,
+  type Proficiency,
   type Profile,
   type Project,
+  type ProjectLinks,
   type ProjectStatus,
   type ResumeData,
   type TechCategory,
   type TechId,
   type TechStackItem,
+  type WorkMode,
 } from "@/types";
 
 /**
  * The content access layer. Everything that reads content goes through here —
- * no page, component or route imports from `@/data/*` directly.
+ * no page, component or route imports from `@/data/*` or touches Prisma
+ * directly.
  *
- * ## Why every accessor is async
+ * ## Where the content lives
  *
- * These functions currently read from in-memory arrays and could all be
- * synchronous. They are async on purpose: when the source becomes a database
- * or an admin-backed API, the signatures do not change and no call site has to
- * be touched. Making them sync now would guarantee a rewrite later.
+ * Postgres on Neon, read through Prisma. The files in `src/data/` are no longer
+ * the live source; they are kept as the input to `prisma/seed.ts` and as a
+ * rollback reference. Editing one of them changes nothing until the seed is
+ * re-run.
  *
- * ## What changes when the real source arrives
+ * ## What did not change in the swap
  *
- * Only the four imports above, and the bodies of the private `read*` functions
- * below. Filtering, sorting and shaping stay here so the same rules apply
- * whether content comes from a file or a table.
+ * Every exported signature and every return shape. The `read*` functions below
+ * were always the designated swap point, and they are the only thing the
+ * migration touched — filtering, sorting and shaping still live here, so the
+ * same rules apply whether a record came from a file or a table.
+ *
+ * Filtering and sorting deliberately stay in TypeScript rather than moving into
+ * SQL. Two reasons: the ordering rules are not expressible as a plain `ORDER
+ * BY` (an open-ended date range has to sort as if it ends in the far future,
+ * and `order` overrides recency), and at four projects and six contributions
+ * the whole content set is smaller than a single query plan. Worth revisiting
+ * if these tables ever reach a size where reading them whole is not free.
+ *
+ * ## Rows in, domain types out
+ *
+ * A Prisma row is not a `Project`. Nullable columns become optional fields,
+ * flattened columns are reassembled into `dates` / `links` / `bio` / `resume`
+ * objects, and ordered child tables become plain arrays. The `to*` mappers
+ * below are the only place that translation happens, so the storage layout can
+ * change without any consumer noticing.
+ *
+ * ## Union-typed columns
+ *
+ * `status`, `category`, `proficiency` and friends are `String` columns, not
+ * Postgres enums, and the mappers assert them back into their union types.
+ *
+ * That is a deliberate trade. Postgres enums would reject a bad value at write
+ * time, but Prisma enum identifiers cannot contain hyphens, so every one of
+ * these would need an `@map` plus a two-way lookup table between `IN_PROGRESS`
+ * and `"in-progress"` — six of them, each a place where the database and the
+ * TypeScript union can silently drift. Storing the union's own strings means
+ * what is in the column is exactly what the type says, and the admin panel
+ * validates writes against the `as const` tuples in `@/types` that already
+ * exist for that purpose. Revisit if content ever gets written by something
+ * that is not this codebase.
  */
+
+/* ==========================================================================
+   Row -> domain mapping
+   ========================================================================== */
+
+/** Nullable column to optional field. */
+function opt<T>(value: T | null): T | undefined {
+  return value ?? undefined;
+}
+
+/**
+ * Optional booleans: `false` and absent mean the same thing to every consumer,
+ * and the seed files wrote the flag only when it was true. Collapsing the two
+ * keeps `JSON.stringify` output — and therefore the server/client payload —
+ * identical to what these accessors returned before the migration.
+ */
+function flag(value: boolean): true | undefined {
+  return value ? true : undefined;
+}
+
+/** Reassemble the flattened `startDate` / `endDate` columns. */
+function toDateRange(row: { startDate: string; endDate: string | null }): DateRange {
+  return { start: row.startDate, end: row.endDate };
+}
+
+/**
+ * Build an `ImageAsset` from a flattened column group, or `undefined` when
+ * there is no image.
+ *
+ * `src` is what decides: `alt` is required on the type but nullable in the
+ * column, so a row with an image and no alt text falls back to an empty string
+ * rather than dropping the image entirely.
+ */
+function toImageAsset(group: {
+  src: string | null;
+  alt: string | null;
+  width: number | null;
+  height: number | null;
+  caption: string | null;
+}): ImageAsset | undefined {
+  if (!group.src) return undefined;
+  return {
+    src: group.src,
+    alt: group.alt ?? "",
+    width: opt(group.width),
+    height: opt(group.height),
+    caption: opt(group.caption),
+  };
+}
+
+/** Child rows carry an explicit `position`; nothing relies on insertion order. */
+function byPosition(a: { position: number }, b: { position: number }): number {
+  return a.position - b.position;
+}
+
+type TechRow = Prisma.TechStackItemGetPayload<object>;
+
+function toTechStackItem(row: TechRow): TechStackItem {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category as TechCategory,
+    icon: opt(row.icon),
+    url: opt(row.url),
+    proficiency: opt(row.proficiency) as Proficiency | undefined,
+    yearsOfExperience: opt(row.yearsOfExperience),
+    since: opt(row.since),
+    featured: flag(row.featured),
+  };
+}
+
+type ProjectRow = Prisma.ProjectGetPayload<{
+  include: { tech: true; images: true };
+}>;
+
+function toProject(row: ProjectRow): Project {
+  /* `ProjectLinks` fields are all optional, so an absent link must be an
+     absent key rather than an explicit null. */
+  const links: ProjectLinks = {
+    repo: opt(row.linksRepo),
+    live: opt(row.linksLive),
+    demo: opt(row.linksDemo),
+    caseStudy: opt(row.linksCaseStudy),
+  };
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    summary: row.summary,
+    description: row.description,
+    role: row.role,
+    status: row.status as ProjectStatus,
+    dates: toDateRange(row),
+    tech: [...row.tech].sort(byPosition).map((entry) => entry.techId),
+    links,
+    images: [...row.images].sort(byPosition).map((image) => ({
+      src: image.src,
+      alt: image.alt,
+      width: opt(image.width),
+      height: opt(image.height),
+      caption: opt(image.caption),
+    })),
+    featured: row.featured,
+    /* `highlights` is optional on the type but non-nullable in Postgres, where
+       "none" is an empty array. Collapsed back to `undefined` so callers do not
+       have to distinguish two spellings of the same absence. */
+    highlights: row.highlights.length > 0 ? row.highlights : undefined,
+    client: opt(row.client),
+    includeInResume: row.includeInResume,
+    order: opt(row.order),
+  };
+}
+
+type ExperienceRow = Prisma.ExperienceGetPayload<{ include: { tech: true } }>;
+
+function toExperience(row: ExperienceRow): Experience {
+  return {
+    id: row.id,
+    slug: row.slug,
+    company: row.company,
+    companyUrl: opt(row.companyUrl),
+    role: row.role,
+    employmentType: opt(row.employmentType) as EmploymentType | undefined,
+    location: opt(row.location),
+    workMode: opt(row.workMode) as WorkMode | undefined,
+    dates: toDateRange(row),
+    description: row.description,
+    highlights: row.highlights,
+    tech: [...row.tech].sort(byPosition).map((entry) => entry.techId),
+    includeInResume: row.includeInResume,
+    order: opt(row.order),
+  };
+}
+
+type ContributionRow = Prisma.ContributionGetPayload<{
+  include: { prLinks: true };
+}>;
+
+function toContribution(row: ContributionRow): Contribution {
+  const prLinks: PrLink[] = [...row.prLinks]
+    .sort(byPosition)
+    .map((link) => ({ label: link.label, url: link.url }));
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    repoName: row.repoName,
+    owner: opt(row.owner),
+    repoUrl: row.repoUrl,
+    repoDescription: row.repoDescription,
+    contributionSummary: row.contributionSummary,
+    contributionDetails: row.contributionDetails,
+    prLinks,
+    tech: row.tech,
+    mergedDate: opt(row.mergedDate),
+    featured: row.featured,
+    includeInResume: row.includeInResume,
+    order: opt(row.order),
+  };
+}
+
+type EducationRow = Prisma.EducationGetPayload<object>;
+
+function toEducation(row: EducationRow): Education {
+  return {
+    id: row.id,
+    institution: row.institution,
+    fieldOfStudy: row.fieldOfStudy,
+    status: row.status as EducationStatus,
+    dates: toDateRange(row),
+  };
+}
+
+type CertificationRow = Prisma.CertificationGetPayload<object>;
+
+function toCertification(row: CertificationRow): Certification {
+  return {
+    id: row.id,
+    title: row.title,
+    platform: row.platform,
+    description: opt(row.description),
+    imageUrl: opt(row.imageUrl),
+    credentialUrl: row.credentialUrl,
+    dateEarned: row.dateEarned,
+  };
+}
+
+type ProfileRow = Prisma.ProfileGetPayload<{ include: { links: true } }>;
+
+function toProfile(row: ProfileRow): Profile {
+  const links: ContactLink[] = [...row.links].sort(byPosition).map((link) => ({
+    label: link.label,
+    href: link.href,
+    icon: opt(link.icon),
+    handle: opt(link.handle),
+    primary: flag(link.primary),
+  }));
+
+  return {
+    name: row.name,
+    tagline: row.tagline,
+    bio: { short: row.bioShort, long: row.bioLong },
+    email: row.email,
+    location: opt(row.location),
+    avatar: toImageAsset({
+      src: row.avatarSrc,
+      alt: row.avatarAlt,
+      width: row.avatarWidth,
+      height: row.avatarHeight,
+      caption: row.avatarCaption,
+    }),
+    avatarCompact: toImageAsset({
+      src: row.avatarCompactSrc,
+      alt: row.avatarCompactAlt,
+      width: row.avatarCompactWidth,
+      height: row.avatarCompactHeight,
+      caption: row.avatarCompactCaption,
+    }),
+    availableForWork: flag(row.availableForWork),
+    links,
+    resume: {
+      title: row.resumeTitle,
+      summary: row.resumeSummary,
+      fileName: row.resumeFileName,
+      location: opt(row.resumeLocation),
+      phone: opt(row.resumePhone),
+      updatedAt: row.resumeUpdatedAt,
+    },
+  };
+}
 
 /* ==========================================================================
    Source adapters — the swap point
    ========================================================================== */
 
+/**
+ * The pinned id of the single profile row. `Profile` is one record by
+ * definition, so the table has one row and this is its primary key.
+ */
+const PROFILE_ID = "profile";
+
+/** The pinned id of the single site-settings row. Same reasoning. */
+const SITE_SETTINGS_ID = "site";
+
+/**
+ * A missing singleton row is a broken deployment, not an empty state.
+ *
+ * Every page renders the profile — the header, the hero, the CV. Returning a
+ * placeholder would ship a site with someone else's name on it; failing here
+ * makes an unseeded database obvious the first time anyone loads a page.
+ */
+function missingSingleton(what: string): Error {
+  return new Error(
+    `No ${what} row found. The database has not been seeded — run \`npm run db:seed\`.`,
+  );
+}
+
 async function readProfile(): Promise<Profile> {
-  return profileSeed;
+  const row = await prisma.profile.findUnique({
+    where: { id: PROFILE_ID },
+    include: { links: true },
+  });
+  if (!row) throw missingSingleton("profile");
+  return toProfile(row);
 }
 
 async function readProjects(): Promise<Project[]> {
-  return projectsSeed;
+  const rows = await prisma.project.findMany({
+    include: { tech: true, images: true },
+    /* Not the final order — `getProjects()` applies the real rules. This only
+       makes the query itself deterministic. */
+    orderBy: { id: "asc" },
+  });
+  return rows.map(toProject);
 }
 
 async function readExperience(): Promise<Experience[]> {
-  return experienceSeed;
+  const rows = await prisma.experience.findMany({
+    include: { tech: true },
+    orderBy: { id: "asc" },
+  });
+  return rows.map(toExperience);
 }
 
+/**
+ * `TechStackItem`, `Education` and `Certification` carry a `position` column
+ * that is not part of their TypeScript types and is never returned from here.
+ *
+ * Those three entities have no `order` field on the type — unlike `Project`,
+ * `Experience` and `Contribution` — so before the migration their sequence was
+ * simply the order they happened to sit in the seed file. That was invisible
+ * until it was not: two Scrimba certificates share `dateEarned: "2026-09"`, and
+ * a sort with no tie-break would have reordered the Education section on every
+ * deploy depending on what the database felt like returning first.
+ *
+ * `position` preserves the authored sequence and gives the admin panel
+ * something to reorder. It stays internal to this layer.
+ */
+const BY_POSITION = [{ position: "asc" }, { id: "asc" }] as const;
+
 async function readTechStack(): Promise<TechStackItem[]> {
-  return techSeed;
+  const rows = await prisma.techStackItem.findMany({ orderBy: [...BY_POSITION] });
+  return rows.map(toTechStackItem);
 }
 
 async function readContributions(): Promise<Contribution[]> {
-  return contributionsSeed;
+  const rows = await prisma.contribution.findMany({
+    include: { prLinks: true },
+    orderBy: { id: "asc" },
+  });
+  return rows.map(toContribution);
 }
 
 async function readEducation(): Promise<Education[]> {
-  return educationSeed;
+  const rows = await prisma.education.findMany({ orderBy: [...BY_POSITION] });
+  return rows.map(toEducation);
 }
 
 async function readCertifications(): Promise<Certification[]> {
-  return certificationsSeed;
+  const rows = await prisma.certification.findMany({ orderBy: [...BY_POSITION] });
+  return rows.map(toCertification);
+}
+
+async function readSiteSettings() {
+  const row = await prisma.siteSettings.findUnique({
+    where: { id: SITE_SETTINGS_ID },
+  });
+  if (!row) throw missingSingleton("site settings");
+  return row;
 }
 
 /* ==========================================================================
@@ -135,7 +466,7 @@ export type ProjectQuery = {
  * Projects, sorted by `order` then recency.
  *
  * Returns a new array every call — callers can sort or splice the result
- * without corrupting the shared source.
+ * without corrupting anything shared.
  */
 export async function getProjects(query: ProjectQuery = {}): Promise<Project[]> {
   const { featured, status, tech, includeInResume, limit } = query;
@@ -158,8 +489,11 @@ export async function getProjects(query: ProjectQuery = {}): Promise<Project[]> 
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const projects = await readProjects();
-  return projects.find((project) => project.slug === slug) ?? null;
+  const row = await prisma.project.findUnique({
+    where: { slug },
+    include: { tech: true, images: true },
+  });
+  return row ? toProject(row) : null;
 }
 
 export async function getFeaturedProjects(limit?: number): Promise<Project[]> {
@@ -169,12 +503,17 @@ export async function getFeaturedProjects(limit?: number): Promise<Project[]> {
 /**
  * Slugs for `generateStaticParams()` on `/work/[slug]`.
  *
- * Separate from `getProjects()` because a real source can answer this with a
- * single-column query instead of loading every record.
+ * Separate from `getProjects()` so it can be answered with a single-column
+ * query instead of loading every record and its relations.
  */
 export async function getProjectSlugs(): Promise<string[]> {
-  const projects = await readProjects();
-  return projects.map((project) => project.slug);
+  const rows = await prisma.project.findMany({
+    select: { slug: true },
+    /* Curated order, matching `getProjects()`, so the two never disagree about
+       which project comes first. Entries with no `order` sort last. */
+    orderBy: [{ order: { sort: "asc", nulls: "last" } }, { id: "asc" }],
+  });
+  return rows.map((row) => row.slug);
 }
 
 /* ==========================================================================
@@ -205,8 +544,11 @@ export async function getExperience(
 }
 
 export async function getExperienceBySlug(slug: string): Promise<Experience | null> {
-  const entries = await readExperience();
-  return entries.find((entry) => entry.slug === slug) ?? null;
+  const row = await prisma.experience.findUnique({
+    where: { slug },
+    include: { tech: true },
+  });
+  return row ? toExperience(row) : null;
 }
 
 /** The single current role, if there is one. Drives "currently at X" lines. */
@@ -246,8 +588,8 @@ export async function getTechStack(query: TechQuery = {}): Promise<TechStackItem
  * Lookup table keyed by `TechId`.
  *
  * Fetch this once per page and resolve every project's tech references against
- * it, rather than calling `getTechById` inside a render loop. A plain object
- * rather than a `Map` so it crosses the server/client boundary intact.
+ * it, rather than calling into the database inside a render loop. A plain
+ * object rather than a `Map` so it crosses the server/client boundary intact.
  */
 export async function getTechIndex(): Promise<Record<TechId, TechStackItem>> {
   const items = await readTechStack();
@@ -308,14 +650,21 @@ export async function getContributions(
 export async function getContributionBySlug(
   slug: string,
 ): Promise<Contribution | null> {
-  const entries = await readContributions();
-  return entries.find((entry) => entry.slug === slug) ?? null;
+  const row = await prisma.contribution.findUnique({
+    where: { slug },
+    include: { prLinks: true },
+  });
+  return row ? toContribution(row) : null;
 }
 
 /** Slugs for `generateStaticParams()` on a contribution detail route. */
 export async function getContributionSlugs(): Promise<string[]> {
-  const entries = await readContributions();
-  return entries.map((entry) => entry.slug);
+  const rows = await prisma.contribution.findMany({
+    select: { slug: true },
+    /* Curated order, matching `getContributions()`. */
+    orderBy: [{ order: { sort: "asc", nulls: "last" } }, { id: "asc" }],
+  });
+  return rows.map((row) => row.slug);
 }
 
 /* ==========================================================================
@@ -324,24 +673,24 @@ export async function getContributionSlugs(): Promise<string[]> {
 
 /** Formal education, most recent first. */
 export async function getEducation(): Promise<Education[]> {
-  return (await readEducation()).slice().sort(byRecencyDesc);
+  return (await readEducation()).sort(byRecencyDesc);
 }
 
 /** Supporting line shown under the education entries, on site and on the CV. */
 export async function getEducationNote(): Promise<string> {
-  return educationNote;
+  return (await readSiteSettings()).educationNote;
 }
 
 /** Issuer profile listing every certificate. */
 export async function getCertificatesUrl(): Promise<string> {
-  return certificatesUrl;
+  return (await readSiteSettings()).certificatesUrl;
 }
 
 /** Certifications, most recently earned first. */
 export async function getCertifications(): Promise<Certification[]> {
-  return (await readCertifications())
-    .slice()
-    .sort((a, b) => b.dateEarned.localeCompare(a.dateEarned));
+  return (await readCertifications()).sort((a, b) =>
+    b.dateEarned.localeCompare(a.dateEarned),
+  );
 }
 
 /* ==========================================================================
@@ -368,6 +717,7 @@ export async function getResumeData(): Promise<ResumeData> {
     contributions,
     featuredTech,
     education,
+    educationNote,
     certifications,
   ] = await Promise.all([
     getProfile(),
@@ -376,6 +726,7 @@ export async function getResumeData(): Promise<ResumeData> {
     getContributions({ includeInResume: true }),
     getTechStack({ featured: true }),
     getEducation(),
+    getEducationNote(),
     getCertifications(),
   ]);
 
@@ -404,13 +755,17 @@ export async function getResumeData(): Promise<ResumeData> {
  * Catch the mistakes this content model makes possible: duplicate keys, tech
  * references that point at nothing, and backwards date ranges.
  *
- * Referencing tech by id is what keeps icons and categories from drifting, but
- * it means a typo silently drops a skill from the CV instead of failing loudly.
- * This is the check that makes that trade safe.
+ * Several of these are now enforced by the schema rather than discovered here.
+ * Ids and slugs are primary and unique keys, and `ProjectTech` / `ExperienceTech`
+ * are foreign keys into the tech table, so a duplicate or an unresolvable tech
+ * reference is rejected at write time — the seed fails rather than the CV
+ * quietly losing a skill.
  *
- * Runs automatically in development (below). Worth wiring into CI, and worth
- * keeping when the source becomes a database — the same references can break
- * there for different reasons.
+ * The checks are kept anyway. They cost one read of a very small dataset, they
+ * still catch what the schema cannot express (a date range that runs backwards,
+ * a contribution with nothing to link to, an education entry marked complete
+ * with no end date), and they are the thing that would notice if a future
+ * migration relaxed one of those constraints.
  */
 export async function validateContent(): Promise<string[]> {
   const [projects, experience, tech, contributions, education, certifications] =
@@ -482,9 +837,16 @@ export async function validateContent(): Promise<string[]> {
 }
 
 if (process.env.NODE_ENV === "development") {
-  void validateContent().then((issues) => {
-    if (issues.length > 0) {
-      console.warn(`[content] ${issues.length} issue(s) found:\n  ${issues.join("\n  ")}`);
-    }
-  });
+  /* Now a database round-trip rather than an array walk, so it has to tolerate
+     the database not being reachable: a dev server started before `docker
+     compose up` should warn, not crash on an unhandled rejection. */
+  void validateContent()
+    .then((issues) => {
+      if (issues.length > 0) {
+        console.warn(`[content] ${issues.length} issue(s) found:\n  ${issues.join("\n  ")}`);
+      }
+    })
+    .catch((error) => {
+      console.warn("[content] could not run the integrity check:", error);
+    });
 }

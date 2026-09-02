@@ -1,0 +1,393 @@
+// Prisma schema — the live content source for the portfolio.
+//
+// This models `src/types/index.ts` one-to-one. The TypeScript types remain the
+// contract every consumer compiles against; this file is how those shapes are
+// persisted. `src/lib/data.ts` is the only place that translates between the
+// two, so a column layout decision here never leaks into a component.
+//
+// Three mapping conventions are used throughout, chosen once so they read the
+// same everywhere:
+//
+//  1. `DateRange` flattens to `startDate` / `endDate` columns. Dates stay ISO
+//     strings (`YYYY-MM`, `YYYY-MM-DD`) exactly as the types specify — `String`,
+//     not `DateTime`, because a month-precision value has no valid `DateTime`
+//     representation and round-tripping through one would invent a day and a
+//     timezone that were never in the data.
+//
+//  2. Nested single objects (`ProjectLinks`, `ImageAsset` on Profile,
+//     `ResumeMeta`) flatten into prefixed columns rather than JSON, so every
+//     field stays individually queryable and typed.
+//
+//  3. Ordered child collections (`images`, `prLinks`, `links`, and the `tech`
+//     references) are real related tables carrying an explicit `position`.
+//     Order is content here — the first image is the cover — so it is stored,
+//     not left to insertion luck.
+//
+// Union-typed fields (`status`, `category`, `proficiency`, ...) are `String`
+// columns rather than Postgres enums. See the note in `src/lib/data.ts`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Connection URLs live in `prisma.config.ts` (CLI, unpooled `DIRECT_URL`) and
+// `src/lib/prisma.ts` (runtime, pooled `DATABASE_URL`). Prisma 7 no longer
+// accepts `url` here — see the note in either file for why the split matters
+// on Neon.
+datasource db {
+  provider = "postgresql"
+}
+
+/* ==========================================================================
+   Tech stack
+   ========================================================================== */
+
+/// Mirrors `TechStackItem`. `id` is the slug (`"typescript"`) and is the key
+/// every project and experience references.
+model TechStackItem {
+  id                String  @id
+  name              String
+  /// `TechCategory`
+  category          String
+  icon              String?
+  url               String?
+  /// `Proficiency`
+  proficiency       String?
+  yearsOfExperience Int?
+  /// `ISODate`, `YYYY-MM`
+  since             String?
+  featured          Boolean @default(false)
+  /// Authored order. Not part of `TechStackItem` — see the note on `position`
+  /// in `src/lib/data.ts`.
+  position Int @default(0)
+
+  projects    ProjectTech[]
+  experiences ExperienceTech[]
+
+  @@index([category])
+  @@index([featured])
+  @@map("tech_stack_items")
+}
+
+/* ==========================================================================
+   Projects
+   ========================================================================== */
+
+/// Mirrors `Project`. `links` and `dates` are flattened; `tech`, `images` and
+/// `highlights` are ordered collections.
+model Project {
+  id      String @id
+  slug    String @unique
+  title   String
+  summary String
+  /// Markdown
+  description String
+  role        String
+  /// `ProjectStatus`
+  status String
+
+  /// `DateRange.start`
+  startDate String
+  /// `DateRange.end` — null means ongoing
+  endDate String?
+
+  /// `ProjectLinks`, flattened. Prefixed so the grouping survives.
+  linksRepo      String?
+  linksLive      String?
+  linksDemo      String?
+  linksCaseStudy String?
+
+  featured Boolean @default(false)
+  /// `highlights?` — a Postgres text[]; order preserved, empty means absent.
+  highlights      String[] @default([])
+  client          String?
+  includeInResume Boolean  @default(false)
+  /// Manual sort override. Lower sorts first.
+  order Int?
+
+  tech   ProjectTech[]
+  images ProjectImage[]
+
+  @@index([featured])
+  @@index([includeInResume])
+  @@map("projects")
+}
+
+/// Ordered join between `Project` and `TechStackItem`.
+///
+/// A join table rather than a `String[]` of ids: it makes an unresolvable tech
+/// reference impossible at the database level, which is the failure
+/// `validateContent()` exists to catch. `position` preserves the authored order
+/// the cards render in.
+model ProjectTech {
+  projectId String
+  techId    String
+  position  Int
+
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tech    TechStackItem @relation(fields: [techId], references: [id], onDelete: Restrict)
+
+  @@id([projectId, techId])
+  @@index([techId])
+  @@map("project_tech")
+}
+
+/// Mirrors `ImageAsset` for a project. Lowest `position` is the cover.
+model ProjectImage {
+  id        String  @id @default(cuid())
+  projectId String
+  position  Int
+  src       String
+  alt       String
+  width     Int?
+  height    Int?
+  caption   String?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, position])
+  @@map("project_images")
+}
+
+/* ==========================================================================
+   Experience
+   ========================================================================== */
+
+/// Mirrors `Experience`. Currently seeds to zero rows — see
+/// `src/data/experience.ts` for why that is deliberate, not a gap.
+model Experience {
+  id         String  @id
+  slug       String  @unique
+  company    String
+  companyUrl String?
+  role       String
+  /// `EmploymentType`
+  employmentType String?
+  location       String?
+  /// `WorkMode`
+  workMode String?
+
+  /// `DateRange.start`
+  startDate String
+  /// `DateRange.end` — null means current role
+  endDate String?
+
+  description String
+  /// Achievement bullets, strongest first. Order preserved.
+  highlights      String[] @default([])
+  includeInResume Boolean  @default(false)
+  order           Int?
+
+  tech ExperienceTech[]
+
+  @@index([includeInResume])
+  @@map("experiences")
+}
+
+/// Ordered join between `Experience` and `TechStackItem`. Same rationale as
+/// `ProjectTech`.
+model ExperienceTech {
+  experienceId String
+  techId       String
+  position     Int
+
+  experience Experience    @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  tech       TechStackItem @relation(fields: [techId], references: [id], onDelete: Restrict)
+
+  @@id([experienceId, techId])
+  @@index([techId])
+  @@map("experience_tech")
+}
+
+/* ==========================================================================
+   Open-source contributions
+   ========================================================================== */
+
+/// Mirrors `Contribution`.
+///
+/// `tech` here is `String[]`, not a relation — unlike `Project.tech`. That
+/// asymmetry is intentional and matches the type: contribution tech is
+/// free-form display labels for whatever a single PR touched, often outside
+/// this portfolio's own stack. Forcing them through `TechStackItem` would mean
+/// inventing registry entries that misrepresent the stack.
+model Contribution {
+  id                  String  @id
+  slug                String  @unique
+  repoName            String
+  owner               String?
+  repoUrl             String
+  repoDescription     String
+  contributionSummary String
+  /// Markdown
+  contributionDetails String
+  /// Free-form display labels, NOT `TechId` references.
+  tech String[] @default([])
+  /// `ISODate`, `YYYY-MM`. Optional — not always recorded.
+  mergedDate      String?
+  featured        Boolean @default(false)
+  includeInResume Boolean @default(false)
+  order           Int?
+
+  prLinks PrLink[]
+
+  @@index([featured])
+  @@index([includeInResume])
+  @@map("contributions")
+}
+
+/// Mirrors `PrLink`. A related table rather than a JSON column so individual
+/// PRs stay queryable — "which contributions touch repo X", "how many merged
+/// PRs in total" — and so the admin panel can edit one link without rewriting
+/// a blob.
+model PrLink {
+  id             String @id @default(cuid())
+  contributionId String
+  position       Int
+  /// Display text, e.g. "PR #84 — Analytics Dashboard".
+  label String
+  url   String
+
+  contribution Contribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+
+  @@unique([contributionId, position])
+  @@index([url])
+  @@map("pr_links")
+}
+
+/* ==========================================================================
+   Education and certifications
+   ========================================================================== */
+
+/// Mirrors `Education`.
+model Education {
+  id           String @id
+  institution  String
+  fieldOfStudy String
+  /// `EducationStatus`
+  status String
+
+  /// `DateRange.start`
+  startDate String
+  /// `DateRange.end` — null while still enrolled
+  endDate String?
+
+  /// Authored order. Not part of `Education` — see the note on `position` in
+  /// `src/lib/data.ts`.
+  position Int @default(0)
+
+  @@index([position])
+  @@map("education")
+}
+
+/// Mirrors `Certification`.
+model Certification {
+  id            String  @id
+  title         String
+  platform      String
+  description   String?
+  imageUrl      String?
+  credentialUrl String
+  /// `ISODate`
+  dateEarned String
+
+  /// Authored order. Not part of `Certification` — see the note on `position`
+  /// in `src/lib/data.ts`. This one is load-bearing: two Scrimba certificates
+  /// share `dateEarned: "2026-09"`, and without a stable tie-break the
+  /// Education section would reorder them between deploys.
+  position Int @default(0)
+
+  @@index([dateEarned])
+  @@map("certifications")
+}
+
+/* ==========================================================================
+   Profile
+   ========================================================================== */
+
+/// Mirrors `Profile`. Single row, pinned to `id = "profile"`.
+///
+/// A one-row table rather than a config file because the admin panel needs to
+/// edit it like anything else. The literal `@default("profile")` on the `@id`
+/// makes a second row impossible to insert by accident.
+model Profile {
+  id String @id @default("profile")
+
+  name             String
+  tagline          String
+  /// `bio.short`
+  bioShort         String
+  /// `bio.long`, Markdown
+  bioLong          String
+  email            String
+  location         String?
+  availableForWork Boolean @default(false)
+
+  /// `avatar?: ImageAsset`, flattened. A null `avatarSrc` means no avatar.
+  avatarSrc     String?
+  avatarAlt     String?
+  avatarWidth   Int?
+  avatarHeight  Int?
+  avatarCaption String?
+
+  /// `avatarCompact?: ImageAsset`, flattened. Art direction below `lg`.
+  avatarCompactSrc     String?
+  avatarCompactAlt     String?
+  avatarCompactWidth   Int?
+  avatarCompactHeight  Int?
+  avatarCompactCaption String?
+
+  /// `resume: ResumeMeta`, flattened.
+  resumeTitle    String
+  resumeSummary  String
+  resumeFileName String
+  resumeLocation String?
+  /// CV-only. Never rendered on a public page.
+  resumePhone String?
+  /// `ISODate`, `YYYY-MM-DD`
+  resumeUpdatedAt String
+
+  links ContactLink[]
+
+  @@map("profile")
+}
+
+/// Mirrors `ContactLink`. Ordered — the footer and CV header render them in
+/// the sequence they are stored in.
+model ContactLink {
+  id        String  @id @default(cuid())
+  profileId String
+  position  Int
+  label     String
+  href      String
+  icon      String?
+  /// Display form: `@handle`, an email address, a bare domain.
+  handle String?
+  /// Show in compact places — footer, CV header — rather than every link.
+  primary Boolean @default(false)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, position])
+  @@map("contact_links")
+}
+
+/* ==========================================================================
+   Site settings
+   ========================================================================== */
+
+/// Editorial copy that belongs to no single entity.
+///
+/// `educationNote` and `certificatesUrl` were module-level exports in
+/// `src/data/education.ts` with no home in the type model. They are content the
+/// admin panel must be able to edit, so they get a row rather than staying
+/// hardcoded. Single row, pinned to `id = "site"`.
+model SiteSettings {
+  id String @id @default("site")
+
+  /// Supporting line under the education entries, on the site and the CV.
+  educationNote String
+  /// Issuer profile listing every certificate, for the "see all" link.
+  certificatesUrl String
+
+  @@map("site_settings")
+}
