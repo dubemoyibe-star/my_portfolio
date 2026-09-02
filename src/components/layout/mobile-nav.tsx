@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { DownloadIcon } from "@/components/ui/download-icon";
 import { Icon } from "@/components/ui/icon";
 import { sameDocumentHash } from "@/lib/nav";
+import { cn } from "@/lib/utils";
 import type { ContactLink, NavItem } from "@/types";
 
 export type MobileNavProps = {
@@ -133,9 +134,27 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
         onClick={() => setOpen((value) => !value)}
         className="flex size-10 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-border-strong hover:text-foreground"
       >
-        <span aria-hidden="true" className="flex flex-col gap-[5px]">
-          <span className="block h-px w-4.5 bg-current" />
-          <span className="block h-px w-4.5 bg-current" />
+        {/* Two bars that cross into an X rather than a glyph swap.
+            Both are absolutely centred and moved apart by transform alone, so
+            open and closed differ only in `transform` and the browser has one
+            animatable property to interpolate — swapping `top` values, or one
+            icon for another, gives it nothing to tween and the change just
+            snaps. `--ease-out-quart` is the shared easing from the design
+            system, and the base layer's reduced-motion rule collapses the
+            duration for anyone who has asked for that. */}
+        <span aria-hidden="true" className="relative block size-4.5">
+          <span
+            className={cn(
+              "absolute inset-x-0 top-1/2 h-px bg-current transition-transform duration-300 ease-out-quart",
+              open ? "-translate-y-1/2 rotate-45" : "translate-y-[calc(-50%-3px)]",
+            )}
+          />
+          <span
+            className={cn(
+              "absolute inset-x-0 top-1/2 h-px bg-current transition-transform duration-300 ease-out-quart",
+              open ? "-translate-y-1/2 -rotate-45" : "translate-y-[calc(-50%+3px)]",
+            )}
+          />
         </span>
       </button>
 
