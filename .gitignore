@@ -43,6 +43,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# nextjs default agents files 
-./AGENTS.md
-./CLAUDE.md
+# nextjs default agents files, regenerated on every fresh `next dev`
+/AGENTS.md
+/CLAUDE.md
