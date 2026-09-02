@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
@@ -30,6 +31,9 @@ const CV_HREF = "/cv";
  */
 export async function SiteHeader() {
   const profile = await getProfile();
+  /* The tight square crop — at 28px the landscape original would be mostly
+     background. */
+  const mark = profile.avatarCompact ?? profile.avatar;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md print:hidden">
@@ -38,10 +42,19 @@ export async function SiteHeader() {
           href="/"
           className="group flex items-center gap-2.5 font-mono text-small tracking-tight"
         >
-          <span
-            aria-hidden="true"
-            className="size-1.5 rounded-full bg-accent transition-shadow group-hover:shadow-glow-accent"
-          />
+          {/* Empty alt: the name sits right beside it, and a screen reader
+              announcing "Portrait of Oyibe Chidubem, Oyibe Chidubem" is worse
+              than silence. Replaces the accent dot rather than joining it —
+              two marks before a wordmark is one too many. */}
+          {mark ? (
+            <Image
+              src={mark.src}
+              alt=""
+              width={mark.width ?? 200}
+              height={mark.height ?? 200}
+              className="size-7 shrink-0 rounded-full border border-border object-cover transition-colors group-hover:border-accent/60"
+            />
+          ) : null}
           <span className="truncate text-foreground">{profile.name}</span>
         </Link>
 

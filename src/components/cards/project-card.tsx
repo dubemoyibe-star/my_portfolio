@@ -83,7 +83,7 @@ export function ProjectCard({ project, tech }: ProjectCardProps) {
                 <LinkButton href={links.live}>Live site</LinkButton>
               ) : null}
               {links.repo ? (
-                <LinkButton href={links.repo}>Repository</LinkButton>
+                <LinkButton href={links.repo}>Code</LinkButton>
               ) : null}
               {links.demo ? <LinkButton href={links.demo}>Demo</LinkButton> : null}
               {links.caseStudy ? (

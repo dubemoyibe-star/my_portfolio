@@ -71,7 +71,16 @@ export const projects = [
     role: "Solo build",
     status: "shipped",
     dates: { start: "2026-03", end: "2026-04" },
-    tech: ["javascript", "tailwind", "sqlite", "react", "node", "express"],
+    tech: [
+      "javascript",
+      "tailwind",
+      "sqlite",
+      "react",
+      "node",
+      "express",
+      "git",
+      "vercel",
+    ],
     links: {
       repo: "https://github.com/dubemoyibe-star/Dsuite",
       live: "https://dsuite-ruddy.vercel.app/",
