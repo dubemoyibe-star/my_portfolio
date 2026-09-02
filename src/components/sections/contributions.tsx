@@ -24,7 +24,7 @@ export async function Contributions() {
       id="contributions"
       eyebrow="Open source"
       title="Open source contributions"
-      description="Work merged into projects I don't own — what the repository does, and what I actually changed in it."
+      description="Work merged into projects I don't own: what the repository does, and what I actually changed in it."
     >
       <ol>
         {contributions.map((contribution) => (
