@@ -44,7 +44,11 @@ export function CertificationCard({ certification }: CertificationCardProps) {
           <span className="label text-muted">{formatMonth(dateEarned)}</span>
         </div>
 
-        <h3 className="mt-3 text-pretty text-h5">{title}</h3>
+        {/* h4, not h3: these sit under the "Certifications" h3 inside the
+            Education section's h2, so h3 here would put the card title at the
+            same outline level as the group heading above it. `text-h5` sets
+            the size, so the level change is invisible. */}
+        <h4 className="mt-3 text-pretty text-h5">{title}</h4>
 
         {description ? (
           <p className="mt-3 text-pretty text-small text-muted">
