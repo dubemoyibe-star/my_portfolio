@@ -109,6 +109,19 @@ export function LoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    /* An empty field never reaches the server. That is a deliberate exception
+       to the rule the rest of this flow follows — empty and wrong are the same
+       answer once a request is made — because there is nothing to check yet:
+       the round trip would spend a throttle attempt to say what is already
+       known here. Not trimmed: a password may legitimately open or close with
+       a space, and it is not this component's place to decide otherwise. */
+    if (password.length === 0) {
+      showError("Enter the password to unlock.");
+      inputRef.current?.focus();
+      return;
+    }
+
     setPending(true);
     hideError();
 
@@ -142,11 +155,12 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-3" noValidate>
-      <label
-        htmlFor="admin-password"
-        className="label text-muted"
-      >
+    <form
+      onSubmit={handleSubmit}
+      className="mt-7 flex flex-col gap-3"
+      noValidate
+    >
+      <label htmlFor="admin-password" className="label text-muted">
         Password
       </label>
 
@@ -157,11 +171,13 @@ export function LoginForm() {
         type="password"
         autoComplete="current-password"
         autoFocus
-        /* No `required`. The browser's own "please fill out this field" bubble
-           would separate an empty submit from a wrong one before the request
-           is even sent — the exact distinction the server refuses to draw. An
-           empty field takes the same round trip and the same answer as a wrong
-           password. */
+        /* The form carries `noValidate`, so this does not summon the browser's
+           own "please fill out this field" bubble — the one piece of unstyled
+           chrome this page would otherwise render. It is here for what it says
+           rather than what it enforces: a screen reader announces the field as
+           required, and `handleSubmit` is what actually holds an empty submit
+           back, in the site's own error styling. */
+        required
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         aria-invalid={error !== null}
