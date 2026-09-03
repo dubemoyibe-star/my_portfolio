@@ -1,20 +1,24 @@
 import type { SiteConfig } from "@/types";
 
-import { profile } from "@/data/profile";
-
 /**
- * Site chrome: navigation, canonical URL, and the metadata defaults.
+ * Site chrome: navigation and the canonical URL.
  *
- * Everything about the *person* is derived from `profile` rather than repeated
- * here — one record owns the name, the role and the social links, so the header,
- * the footer, the CV and the OpenGraph tags cannot disagree about them.
+ * ## What is deliberately not here any more
  *
- * What stays local to this file is genuinely site-level: routes and the domain.
+ * This file used to derive `name`, `role`, `description` and `social` from
+ * `@/data/profile`. That was correct while the seed file was the content
+ * source, and became a bug when the database took over: an import is resolved
+ * once, at module load, so those four values were frozen at whatever was last
+ * committed. The hero and the CV followed an admin edit; the footer, the root
+ * layout's default metadata and the 404 did not.
+ *
+ * They now live behind `getSiteIdentity()` in `@/lib/site-identity`, which
+ * reads the live row and falls back to the seed only when the database cannot
+ * answer. What is left here is what genuinely belongs to the site rather than
+ * to the person: the domain it is served from, and the sections the header
+ * offers.
  */
 export const siteConfig: SiteConfig = {
-  name: profile.name,
-  role: profile.resume.title,
-  description: profile.bio.short,
   url: "https://oyibe.vercel.app",
 
   /* Grows as sections land. Only anchors that exist are listed, so the header
@@ -27,7 +31,4 @@ export const siteConfig: SiteConfig = {
     { label: "Contributions", href: "/#contributions" },
     { label: "Stack", href: "/#stack" },
   ],
-
-  /* All of them. `primary` still marks the two worth showing in tight spots. */
-  social: profile.links,
 };

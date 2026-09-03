@@ -4,13 +4,13 @@ import Link from "next/link";
 import { Container } from "@/components/layout/container";
 import { Reveal } from "@/components/motion/reveal";
 import { RequestedPath } from "@/app/requested-path";
-import { siteConfig } from "@/data/site";
+import { getSiteIdentity } from "@/lib/site-identity";
 
 /**
  * The role, in the site's own register rather than the CV's.
  *
- * `siteConfig.role` is `profile.resume.title` — "Fullstack web developer and
- * blockchain developer" — which is the formal phrasing the CV speaks in. The
+ * The identity's `role` is `profile.resume.title` — "Fullstack web developer
+ * and blockchain developer" — the formal phrasing the CV speaks in. The
  * home page's title uses this shorter form, and someone who landed here from a
  * stray link should read the same line they would have read there.
  */
@@ -37,10 +37,13 @@ const DESTINATIONS = [
  * default — and `noindex` states the obvious for a crawler that follows a
  * dead link, since the 404 status already says it.
  */
-export const metadata: Metadata = {
-  title: { absolute: `404 — Page not found - ${siteConfig.name}` },
-  robots: { index: false, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const identity = await getSiteIdentity();
+  return {
+    title: { absolute: `404 — Page not found - ${identity.name}` },
+    robots: { index: false, follow: true },
+  };
+}
 
 /**
  * 404.
@@ -51,17 +54,23 @@ export const metadata: Metadata = {
  * is the point: the page a broken link lands on should look like a room in the
  * building, not the pavement outside it.
  *
- * Static by construction. Nothing here reads the database, so a 404 still
- * renders if Postgres is unreachable — the failure mode where a visitor is
- * most likely to hit one. `siteConfig` is a plain import, and the requested
- * path comes from the browser.
+ * Renders whatever the database is doing. The name is live content now — a
+ * 404 that introduces you by a stale name is a small lie on the page whose
+ * only job is to be honest about what went wrong — but it is read through
+ * `getSiteIdentity()`, which answers from the seed rather than throwing when
+ * Postgres cannot be reached. That preserves the property this page has always
+ * had, and needs most: a visitor is most likely to land here exactly when
+ * something else is already broken. Nothing else on the page reads content,
+ * and the requested path comes from the browser.
  *
  * The error itself is drawn as terminal output because that is the identity
  * the rest of the site already uses for data: a mono log block, the accent on
  * the status code, amber on the error line — the token whose whole job is
  * "something is degraded". No illustration, no new hue.
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const identity = await getSiteIdentity();
+
   return (
     <section className="relative overflow-hidden">
       {/* Same masked engineering grid as the hero, so the page reads as part
@@ -104,7 +113,7 @@ export default function NotFound() {
           </p>
 
           <p data-reveal className="mt-5 text-pretty text-body-lg text-muted">
-            <span className="font-mono text-foreground">{siteConfig.name}</span>{" "}
+            <span className="font-mono text-foreground">{identity.name}</span>{" "}
             — {ROLE}. This is my portfolio: the things I&apos;ve built, the open
             source I contribute to, and my CV. Whatever the link you followed
             was pointing at, it is probably one of these.

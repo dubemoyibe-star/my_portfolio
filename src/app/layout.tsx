@@ -6,7 +6,8 @@ import { Ambience } from "@/components/layout/ambience";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { siteConfig } from "@/data/site";
-import { ogImages } from "@/lib/seo";
+import { ogImage } from "@/lib/seo";
+import { getSiteIdentity } from "@/lib/site-identity";
 
 import "./globals.css";
 
@@ -18,47 +19,65 @@ import "./globals.css";
  * `metadataBase` is what lets every other URL in the tree stay root-relative:
  * Next resolves canonicals and OpenGraph images against it, so the domain is
  * written once, in `siteConfig.url`.
+ *
+ * ## Why this is a function and not a constant
+ *
+ * The name, the title and the description are live content. As a static
+ * `metadata` export they were read from the seed file at module load, so a
+ * rename in the admin panel reached the hero and left the browser tab, the
+ * OpenGraph card and the `author` tag quoting the committed value.
+ *
+ * `generateMetadata` runs per request, which is what lets it read the row. It
+ * runs for every route in the tree, including the error ones, so the read goes
+ * through `getSiteIdentity()` — which falls back to the seed rather than
+ * throwing when the database cannot answer. See the note there for why the
+ * chrome must degrade where the hero must not.
  */
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: `${siteConfig.name} - ${siteConfig.role}`,
-    template: `%s - ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  authors: [{ name: siteConfig.name, url: siteConfig.url }],
-  creator: siteConfig.name,
+export async function generateMetadata(): Promise<Metadata> {
+  const identity = await getSiteIdentity();
+  const title = `${identity.name} - ${identity.role}`;
 
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: {
+      default: title,
+      template: `%s - ${identity.name}`,
+    },
+    description: identity.description,
+    authors: [{ name: identity.name, url: siteConfig.url }],
+    creator: identity.name,
+
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
 
-  /* Defaults, not the final word: both real pages restate these with their own
-     copy. They exist so a page added later without its own metadata still
-     shares as something intentional rather than as a bare link. */
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: siteConfig.name,
-    locale: "en_US",
-    title: `${siteConfig.name} - ${siteConfig.role}`,
-    description: siteConfig.description,
-    images: [ogImages.home],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${siteConfig.name} - ${siteConfig.role}`,
-    description: siteConfig.description,
-    images: [ogImages.home.url],
-  },
-};
+    /* Defaults, not the final word: both real pages restate these with their
+       own copy. They exist so a page added later without its own metadata
+       still shares as something intentional rather than as a bare link. */
+    openGraph: {
+      type: "website",
+      url: "/",
+      siteName: identity.name,
+      locale: "en_US",
+      title,
+      description: identity.description,
+      images: [ogImage("home", identity)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: identity.description,
+      images: [ogImage("home", identity).url],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   // Matches --background so the browser chrome does not flash white.

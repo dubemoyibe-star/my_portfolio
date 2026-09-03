@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { cache } from "react";
 
 import { prisma } from "@/lib/prisma";
 import {
@@ -445,9 +446,26 @@ function toSet<T>(value: T | T[] | undefined): Set<T> | null {
    Profile
    ========================================================================== */
 
-export async function getProfile(): Promise<Profile> {
+/**
+ * The profile, memoized for the length of one render.
+ *
+ * `cache()` rather than a bare call because this row is read by more of the
+ * tree than anything else in here: on the home page it is wanted by the root
+ * layout's metadata, the header, the footer, the hero, the person schema and
+ * the page's own `generateMetadata`. Each of those used to issue its own
+ * query, and the runtime client holds a single pooled connection by design —
+ * see the note in `@/lib/prisma` — so they did not even run in parallel. Six
+ * serialized round trips for one unchanging row is most of what a visitor was
+ * waiting for.
+ *
+ * Request-scoped, not time-based: `cache()` lasts exactly one render pass, so
+ * an admin save is visible on the very next request. `unstable_cache` would
+ * add a lifetime of its own on top of the one `revalidatePath` already
+ * manages, which is how the chrome ends up a version behind the body.
+ */
+export const getProfile = cache(async (): Promise<Profile> => {
   return readProfile();
-}
+});
 
 /* ==========================================================================
    Projects
