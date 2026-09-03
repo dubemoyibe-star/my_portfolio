@@ -4,12 +4,12 @@ import { notFound } from "next/navigation";
 
 import { AdminPageHeader } from "@/components/admin/chrome";
 import { toProjectInput } from "@/lib/admin/project-input";
+import { readTechOptions } from "@/lib/admin/tech-options";
 import { isCloudinaryConfigured } from "@/lib/cloudinary";
 import { getProjectBySlug } from "@/lib/data";
 import { prisma } from "@/lib/prisma";
 
 import { ProjectForm } from "../project-form";
-import { readTechOptions } from "../tech-options";
 
 /**
  * The edit screen, keyed by `id` rather than by slug.

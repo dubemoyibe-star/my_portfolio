@@ -17,10 +17,12 @@ export const siteConfig: SiteConfig = {
   description: profile.bio.short,
   url: "https://oyibe.vercel.app",
 
-  /* Grows as sections land. Projects, Contributions and the CV link are added
-     in the later UI passes; only anchors that exist are listed, so the header
-     never offers a dead link. */
+  /* Grows as sections land. Only anchors that exist are listed, so the header
+     never offers a dead link — which is also why Experience appears here only
+     now: the section renders `null` while there are no roles, and a nav item
+     pointing at an id that is not in the document scrolls nowhere. */
   nav: [
+    { label: "Experience", href: "/#experience" },
     { label: "Projects", href: "/#projects" },
     { label: "Contributions", href: "/#contributions" },
     { label: "Stack", href: "/#stack" },

@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 
 import { AdminPageHeader } from "@/components/admin/chrome";
 import { emptyProject } from "@/lib/admin/project-input";
+import { readTechOptions } from "@/lib/admin/tech-options";
 import { isCloudinaryConfigured } from "@/lib/cloudinary";
 
 import { ProjectForm } from "../project-form";
-import { readTechOptions } from "../tech-options";
 
 /**
  * The create screen.

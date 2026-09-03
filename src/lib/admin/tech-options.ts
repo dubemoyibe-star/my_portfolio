@@ -5,10 +5,11 @@ import type { TechCategory } from "@/types";
 /**
  * The tech vocabulary, shaped for the picker.
  *
- * Shared by the new and edit pages so the two cannot end up ordering or
- * filtering it differently. Sorted by the same `position` the seed authored
- * and the tech editor will maintain, so the picker's list matches the order
- * the Tech stack section shows.
+ * Shared by every editor that references tech — the project screens and the
+ * experience screens — so no two of them can end up ordering or filtering it
+ * differently. Sorted by the same `position` the seed authored and the tech
+ * editor maintains, so the picker's list matches the order the Tech stack
+ * section shows.
  */
 export async function readTechOptions(): Promise<TechOption[]> {
   const rows = await prisma.techStackItem.findMany({

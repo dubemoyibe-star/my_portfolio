@@ -55,15 +55,15 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     label: "Education",
     description: "The degree entry, the supporting note, and every certificate.",
     countLabel: "certifications",
-    ready: false,
+    ready: true,
   },
   {
     href: "/admin/experience",
     label: "Experience",
     description:
-      "Employment history. Empty today — the public site already handles that.",
+      "Employment history. A role can be saved with nothing but a company, a title and a start date.",
     countLabel: "roles",
-    ready: false,
+    ready: true,
   },
   {
     href: "/admin/profile",
