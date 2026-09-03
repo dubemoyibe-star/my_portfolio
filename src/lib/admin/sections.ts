@@ -48,7 +48,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     description:
       "The tech vocabulary every project and role references, by category.",
     countLabel: "tech items",
-    ready: false,
+    ready: true,
   },
   {
     href: "/admin/education",
