@@ -5,7 +5,7 @@ import { Container } from "@/components/layout/container";
 import { CvSection } from "@/components/cv/cv-section";
 import { CvDownload } from "@/components/cv/cv-download";
 import { getCertificatesUrl, getProfile, getResumeData } from "@/lib/data";
-import { formatDateRange, formatUrl } from "@/lib/format";
+import { formatDateRange, formatRoleMeta, formatUrl } from "@/lib/format";
 import { groupTech } from "@/lib/tech-groups";
 import { ogImages, pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
@@ -30,11 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * The CV, assembled from `getResumeData()`.
  *
- * Every section is conditional on having data. `experience` is empty today —
- * there is no formal employment history yet — so the document currently reads
- * summary, projects, contributions, skills, with no gap and no empty heading
- * where experience would be. Adding roles to `data/experience.ts` makes the
- * section appear here with no change to this file.
+ * Every section is conditional on having data, and so is every part of an
+ * experience entry. A role is added the day it starts — see the note at the
+ * top of `@/lib/admin/experience-input` — so its description, highlights and
+ * supporting line each render only when they have something in them. On a page
+ * where entries stack directly on top of each other, an unguarded empty
+ * paragraph is worse than on the site: it opens a gap between two roles that
+ * reads as a missing block rather than as a role with nothing reported yet.
  *
  * The layout is deliberately not built from the site's cards: a CV wants dense
  * typographic entries that survive a page break, not screenshots and buttons.
@@ -137,45 +139,75 @@ export default async function CvPage() {
 
         {experience.length > 0 ? (
           <CvSection title="Experience">
-            {experience.map((entry) => (
-              <article
-                key={entry.id}
-                data-cv-block
-                className="print:break-inside-avoid"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <h3 className="text-h5">
-                    {entry.role}
-                    <span className="text-muted"> · {entry.company}</span>
-                  </h3>
-                  <span className="label text-muted">
-                    {formatDateRange(entry.dates)}
-                  </span>
-                </div>
+            {experience.map((entry) => {
+              const meta = formatRoleMeta(entry);
 
-                {entry.location ? (
-                  <p className="mt-1 text-small text-muted">{entry.location}</p>
-                ) : null}
+              return (
+                <article
+                  key={entry.id}
+                  data-cv-block
+                  className="print:break-inside-avoid"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <h3 className="text-h5">
+                      {entry.role}
+                      <span className="text-muted"> · {entry.company}</span>
+                    </h3>
+                    <span className="label text-muted">
+                      {formatDateRange(entry.dates)}
+                    </span>
+                  </div>
 
-                <p className="mt-3 text-pretty text-small text-muted">
-                  {entry.description}
-                </p>
+                  {/* Location, work mode and employment type on one line —
+                      only the parts that exist, see `formatRoleMeta` — with
+                      the company's own address on the end of it.
 
-                {entry.highlights.length > 0 ? (
-                  <ul className="mt-3 flex flex-col gap-1.5">
-                    {entry.highlights.map((highlight) => (
-                      <li key={highlight} className="flex gap-3 text-small">
-                        <span
-                          aria-hidden="true"
-                          className="mt-2.5 h-px w-3 shrink-0 bg-accent"
-                        />
-                        <span className="text-pretty">{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </article>
-            ))}
+                      The address is printed as a bare domain rather than
+                      hidden behind the company name in the heading, because
+                      this document's most important reader is holding a sheet
+                      of paper or a flat PDF, where a hyperlink is inert and
+                      invisible. `formatUrl` exists for exactly this: on paper
+                      the URL itself is the useful part. It stays an anchor so
+                      the web version is still clickable. */}
+                  {meta.length > 0 || entry.companyUrl ? (
+                    <p className="mt-1 text-small text-muted">
+                      {meta}
+                      {meta.length > 0 && entry.companyUrl ? " · " : null}
+                      {entry.companyUrl ? (
+                        <a
+                          href={entry.companyUrl}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="text-foreground hover:text-link"
+                        >
+                          {formatUrl(entry.companyUrl)}
+                        </a>
+                      ) : null}
+                    </p>
+                  ) : null}
+
+                  {entry.description.trim().length > 0 ? (
+                    <p className="mt-3 text-pretty text-small text-muted">
+                      {entry.description}
+                    </p>
+                  ) : null}
+
+                  {entry.highlights.length > 0 ? (
+                    <ul className="mt-3 flex flex-col gap-1.5">
+                      {entry.highlights.map((highlight) => (
+                        <li key={highlight} className="flex gap-3 text-small">
+                          <span
+                            aria-hidden="true"
+                            className="mt-2.5 h-px w-3 shrink-0 bg-accent"
+                          />
+                          <span className="text-pretty">{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </article>
+              );
+            })}
           </CvSection>
         ) : null}
 

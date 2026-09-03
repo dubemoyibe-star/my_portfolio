@@ -1,4 +1,9 @@
-import type { DateRange, ISODate } from "@/types";
+import type {
+  DateRange,
+  EmploymentType,
+  ISODate,
+  WorkMode,
+} from "@/types";
 
 const MONTHS = [
   "Jan",
@@ -47,4 +52,60 @@ export function formatUrl(url: string): string {
     .replace(/^https?:\/\//, "")
     .replace(/^www\./, "")
     .replace(/\/+$/, "");
+}
+
+/* ==========================================================================
+   Employment
+   ========================================================================== */
+
+/**
+ * Display names for the two closed sets on `Experience`.
+ *
+ * They live here rather than in the admin's `experience-input` because both
+ * sides need them: the public section and the CV render them, and the editor's
+ * dropdowns are built from them. One definition means a role cannot read
+ * "Full-time" in the form and "full time" on the page.
+ */
+export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
+  "full-time": "Full-time",
+  "part-time": "Part-time",
+  contract: "Contract",
+  freelance: "Freelance",
+  internship: "Internship",
+};
+
+export const WORK_MODE_LABELS: Record<WorkMode, string> = {
+  remote: "Remote",
+  hybrid: "Hybrid",
+  "on-site": "On-site",
+};
+
+/**
+ * `"Lagos, Nigeria · Remote · Contract"` — the supporting line under a role.
+ *
+ * All three parts are optional on the type, and a role that carries none of
+ * them returns `""` so the caller can drop the line entirely rather than
+ * render an empty paragraph. That is the whole reason this returns a string
+ * instead of the caller stringing the fields together at each call site: a
+ * sparse entry — a role just started, with nothing recorded but a company and
+ * a date — must not leave a blank row where the fuller entries have text.
+ *
+ * Unknown values pass through as typed rather than being dropped. These are
+ * `String` columns, not Postgres enums (see `@/lib/data`), so a value outside
+ * the union is possible; showing it is how it gets noticed and fixed.
+ */
+export function formatRoleMeta(entry: {
+  location?: string;
+  workMode?: WorkMode;
+  employmentType?: EmploymentType;
+}): string {
+  return [
+    entry.location,
+    entry.workMode ? (WORK_MODE_LABELS[entry.workMode] ?? entry.workMode) : undefined,
+    entry.employmentType
+      ? (EMPLOYMENT_TYPE_LABELS[entry.employmentType] ?? entry.employmentType)
+      : undefined,
+  ]
+    .filter((part): part is string => Boolean(part && part.trim().length > 0))
+    .join(" · ");
 }
