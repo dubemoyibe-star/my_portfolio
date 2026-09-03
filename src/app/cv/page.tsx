@@ -7,7 +7,8 @@ import { CvDownload } from "@/components/cv/cv-download";
 import { getCertificatesUrl, getProfile, getResumeData } from "@/lib/data";
 import { formatDateRange, formatRoleMeta, formatUrl } from "@/lib/format";
 import { groupTech } from "@/lib/tech-groups";
-import { ogImages, pageMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
+import { getSiteIdentity } from "@/lib/site-identity";
 import { siteConfig } from "@/data/site";
 
 /**
@@ -17,13 +18,16 @@ import { siteConfig } from "@/data/site";
  * shared link to this page wants.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const profile = await getProfile();
+  const [profile, identity] = await Promise.all([
+    getProfile(),
+    getSiteIdentity(),
+  ]);
 
-  return pageMetadata({
-    title: "Oyibe Chidubem — CV / Resume",
+  return await pageMetadata({
+    title: `${identity.name} — CV / Resume`,
     description: profile.resume.summary,
     path: "/cv",
-    image: ogImages.cv,
+    image: "cv",
   });
 }
 

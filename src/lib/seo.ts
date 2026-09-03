@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { siteConfig } from "@/data/site";
+import { getSiteIdentity, type SiteIdentity } from "@/lib/site-identity";
 
 /**
  * Per-page metadata, assembled in one place.
@@ -14,6 +14,13 @@ import { siteConfig } from "@/data/site";
  * Absolute URLs are resolved by Next against `metadataBase` in the root layout,
  * so paths here stay root-relative and the domain is stated exactly once, in
  * `siteConfig.url`.
+ *
+ * ## Why these are async now
+ *
+ * The share-card alt text and the OpenGraph `siteName` are the person's name
+ * and title, which are live content — see `@/lib/site-identity`. Reading them
+ * makes the builders async, which costs nothing at the call sites: every one
+ * of them is already inside an async `generateMetadata`.
  */
 
 export type OgImage = {
@@ -27,23 +34,34 @@ export type OgImage = {
  * The share cards. Both are 1200x630 — the size every crawler crops to, so
  * anything else gets letterboxed or trimmed by the platform instead of by us.
  *
+ * Only the file and its dimensions are fixed here. The alt text names the
+ * person, so it is built per render by `ogImage()` rather than frozen into
+ * this object — the picture is the same after a rename, the description of it
+ * is not.
+ */
+const OG_FILES = {
+  home: { url: "/og-home.png", width: 1200, height: 630 },
+  cv: { url: "/og-cv.png", width: 1200, height: 630 },
+} as const;
+
+export type OgImageKind = keyof typeof OG_FILES;
+
+/**
+ * One share card, described.
+ *
  * `home` doubles as the site-wide default in the root layout: a secondary page
  * that never declares its own image still shares as something deliberate.
  */
-export const ogImages = {
-  home: {
-    url: "/og-home.png",
-    width: 1200,
-    height: 630,
-    alt: `${siteConfig.name} - ${siteConfig.role}`,
-  },
-  cv: {
-    url: "/og-cv.png",
-    width: 1200,
-    height: 630,
-    alt: `The CV of ${siteConfig.name}`,
-  },
-} satisfies Record<string, OgImage>;
+export function ogImage(kind: OgImageKind, identity: SiteIdentity): OgImage {
+  const file = OG_FILES[kind];
+  return {
+    ...file,
+    alt:
+      kind === "cv"
+        ? `The CV of ${identity.name}`
+        : `${identity.name} - ${identity.role}`,
+  };
+}
 
 export type PageSeo = {
   /**
@@ -55,15 +73,17 @@ export type PageSeo = {
   description: string;
   /** Root-relative, no trailing slash: `/` or `/cv`. Becomes the canonical. */
   path: string;
-  image: OgImage;
+  image: OgImageKind;
 };
 
-export function pageMetadata({
+export async function pageMetadata({
   title,
   description,
   path,
   image,
-}: PageSeo): Metadata {
+}: PageSeo): Promise<Metadata> {
+  const identity = await getSiteIdentity();
+
   return {
     title: { absolute: title },
     description,
@@ -75,18 +95,18 @@ export function pageMetadata({
     openGraph: {
       type: "website",
       url: path,
-      siteName: siteConfig.name,
+      siteName: identity.name,
       locale: "en_US",
       title,
       description,
-      images: [image],
+      images: [ogImage(image, identity)],
     },
 
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image.url],
+      images: [OG_FILES[image].url],
     },
   };
 }

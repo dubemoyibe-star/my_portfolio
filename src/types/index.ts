@@ -421,11 +421,17 @@ export type NavItem = {
 /** @deprecated Use {@link ContactLink}. Kept as an alias during the migration. */
 export type SocialLink = ContactLink;
 
+/**
+ * What belongs to the site rather than to the person.
+ *
+ * `name`, `role`, `description` and `social` used to live here too, derived
+ * from the seed profile at import time. They moved to `SiteIdentity` in
+ * `@/lib/site-identity` when the database became the content source: a
+ * module-level constant cannot follow an admin edit, and having two answers to
+ * "what is this person called" is how the tab title and the footer end up
+ * disagreeing.
+ */
 export type SiteConfig = {
-  name: string;
-  role: string;
-  description: string;
   url: string;
   nav: NavItem[];
-  social: ContactLink[];
 };

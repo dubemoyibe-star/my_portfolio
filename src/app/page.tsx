@@ -9,7 +9,8 @@ import { Projects } from "@/components/sections/projects";
 import { TechStack } from "@/components/sections/tech-stack";
 import { PersonSchema } from "@/components/seo/person-schema";
 import { getProfile } from "@/lib/data";
-import { ogImages, pageMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
+import { getSiteIdentity } from "@/lib/site-identity";
 
 /**
  * The description is `profile.bio.short` verbatim: two sentences, already
@@ -21,13 +22,21 @@ import { ogImages, pageMetadata } from "@/lib/seo";
  * changes.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const profile = await getProfile();
+  const [profile, identity] = await Promise.all([
+    getProfile(),
+    getSiteIdentity(),
+  ]);
 
-  return pageMetadata({
-    title: "Oyibe Chidubem — Fullstack & Blockchain Developer",
+  return await pageMetadata({
+    /* The name is live; the role is not. "Fullstack & Blockchain Developer" is
+       a third phrasing of the job — shorter than `resume.title`, which is the
+       CV's formal register and reads as a mouthful in a browser tab — and the
+       content model has no field for it. Interpolating the name at least means
+       a rename does not leave the site's main title quoting the old one. */
+    title: `${identity.name} — Fullstack & Blockchain Developer`,
     description: profile.bio.short,
     path: "/",
-    image: ogImages.home,
+    image: "home",
   });
 }
 
