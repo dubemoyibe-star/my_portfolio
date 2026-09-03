@@ -158,6 +158,28 @@ const ICONS: Record<string, IconEntry> = {
   git: entry(siGit),
 };
 
+/**
+ * Every slug this registry can draw, sorted.
+ *
+ * Derived from `ICONS` rather than kept as a second list, so it cannot drift
+ * from what `Icon` will actually render. The tech editor reads it to answer the
+ * one question a slug field has to answer before a row is saved: will the
+ * public site draw this, or will it fall back to the neutral glyph?
+ *
+ * Note what this list is *not*: it is not the simple-icons catalogue. Icons are
+ * imported one by one above so the bundler can drop the other ~3,400, which
+ * means a perfectly real simple-icons slug renders as the fallback here until
+ * somebody adds it to `ICONS`. That is a deliberate trade, and the tech editor
+ * says so in as many words rather than leaving it to be discovered on the live
+ * site.
+ */
+export const ICON_SLUGS: readonly string[] = Object.keys(ICONS).sort();
+
+/** Whether `Icon` can draw this slug. */
+export function hasIcon(slug: string | undefined | null): boolean {
+  return typeof slug === "string" && slug in ICONS;
+}
+
 export type IconProps = {
   /** Icon slug from the data layer. */
   name?: string;
