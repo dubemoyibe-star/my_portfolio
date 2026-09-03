@@ -18,7 +18,7 @@ type Status = "idle" | "rendering" | "ready" | "error";
 const PAGE_WIDTH = 210;
 const PAGE_HEIGHT = 297;
 const MARGIN = 12;
-const SCALE = 2;
+const SCALE = 1.2;
 
 type Block = { top: number; bottom: number; keepWithNext: boolean };
 type Cut = { start: number; end: number };
@@ -211,7 +211,7 @@ export function CvDownload({ targetId, fileName }: CvDownloadProps) {
           height,
         );
 
-        rendered.push(page.toDataURL("image/png"));
+        rendered.push(page.toDataURL("image/jpeg", 0.85));
         heights.push(height / pixelsPerMm);
       }
 
