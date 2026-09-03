@@ -70,6 +70,6 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     label: "Profile",
     description:
       "Name, tagline, bio, avatar, contact links and the CV header copy.",
-    ready: false,
+    ready: true,
   },
 ];
