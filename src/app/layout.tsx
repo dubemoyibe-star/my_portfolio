@@ -58,6 +58,10 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
 
+    verification: {
+      google: "BVKWjbLp_Nws8lqjIWtcnu-HkGg4GENpBld5TREh3ns",
+    },
+
     /* Defaults, not the final word: both real pages restate these with their
        own copy. They exist so a page added later without its own metadata
        still shares as something intentional rather than as a bare link. */
