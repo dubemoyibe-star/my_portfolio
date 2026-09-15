@@ -1,5 +1,8 @@
-# Everything here is meant to be found.
+# Everything here is meant to be found — except the admin panel, which
+# needs no crawler to ever discover it exists.
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
 
 Sitemap: https://oyibe.vercel.app/sitemap.xml

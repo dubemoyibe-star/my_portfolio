@@ -300,7 +300,7 @@ export function ProfileForm({
             required
             htmlFor={controlId("bioLong")}
             error={fieldErrors.bioLong}
-            hint="Markdown, paragraphs separated by a blank line. Held for the fuller about copy — no page renders it yet, so editing it changes nothing visible today."
+            hint="Markdown, paragraphs separated by a blank line."
           >
             <TextArea
               id={controlId("bioLong")}

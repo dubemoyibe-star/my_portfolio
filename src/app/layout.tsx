@@ -5,6 +5,7 @@ import { GeistSans } from "geist/font/sans";
 import { Ambience } from "@/components/layout/ambience";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { WebSiteSchema } from "@/components/seo/website-schema";
 import { siteConfig } from "@/data/site";
 import { ogImage } from "@/lib/seo";
 import { getSiteIdentity } from "@/lib/site-identity";
@@ -100,6 +101,11 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
+        {/* WebSite structured data. Sitewide, not per-page — see the note in
+            `WebSiteSchema` for why this is the one JSON-LD block safe to
+            repeat on every route, including the noindexed admin ones. */}
+        <WebSiteSchema />
+
         {/* Entrance animations start from opacity:0 in CSS. Without JS, GSAP
             never runs, so restore the visible state or the page reads blank. */}
         <noscript>
