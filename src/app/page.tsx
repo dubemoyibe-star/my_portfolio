@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { HashLanding } from "@/components/layout/hash-landing";
+import { About } from "@/components/sections/about";
 import { Contributions } from "@/components/sections/contributions";
 import { Education } from "@/components/sections/education";
 import { Experience } from "@/components/sections/experience";
@@ -58,9 +59,10 @@ export default function HomePage() {
 
       <HashLanding />
       <Hero />
-      <Experience />
+      <About />
       <Projects />
       <Contributions />
+      <Experience />
       <TechStack />
       <Education />
     </>
