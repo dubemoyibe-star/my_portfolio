@@ -4,16 +4,17 @@ const CANONICAL_ORIGIN = "https://oyibe.dev";
 
 const nextConfig: NextConfig = {
   /**
-   * Permanent (308) redirects from every retired hostname to the canonical
-   * domain, path and query preserved. This is what transfers the indexed
-   * `oyibe.vercel.app` URLs to `oyibe.dev` instead of leaving two copies of the
-   * site competing in search results.
+   * Permanent (308) redirects from alternate hostnames to the canonical domain,
+   * path and query preserved.
+   *
+   * `oyibe.vercel.app` is deliberately not listed yet. When it is time to move
+   * the indexed URLs over, add it to the host list below.
    *
    * Matched on the exact host, so preview deployments (which live on their own
    * `*.vercel.app` hostnames) and local development are untouched.
    */
   async redirects() {
-    return ["oyibe.vercel.app", "www.oyibe.dev"].map((host) => ({
+    return ["www.oyibe.dev"].map((host) => ({
       source: "/:path*",
       has: [{ type: "host" as const, value: host }],
       destination: `${CANONICAL_ORIGIN}/:path*`,
