@@ -7,7 +7,7 @@ restraint rather than effects.
 Every section is driven by a database and edited through a password-gated admin
 panel. Nothing on the public site is hardcoded content.
 
-**Live:** [oyibe.vercel.app](https://oyibe.vercel.app) · **CV:** [oyibe.vercel.app/cv](https://oyibe.vercel.app/cv)
+**Live:** [oyibe.dev](https://oyibe.dev) · **CV:** [oyibe.dev/cv](https://oyibe.dev/cv)
 
 ## Features
 

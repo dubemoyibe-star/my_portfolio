@@ -19,7 +19,7 @@ import type { SiteConfig } from "@/types";
  * offers.
  */
 export const siteConfig: SiteConfig = {
-  url: "https://oyibe.vercel.app",
+  url: "https://oyibe.dev",
 
   /* Grows as sections land. Only anchors that exist are listed, so the header
      never offers a dead link — which is also why Experience appears here only
