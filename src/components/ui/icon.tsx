@@ -34,6 +34,7 @@ import {
   siWeb3dotjs,
   siWhatsapp,
   siX,
+  siExpo
 } from "simple-icons";
 
 import { cn } from "@/lib/utils";
@@ -133,6 +134,7 @@ const ICONS: Record<string, IconEntry> = {
   prisma: entry(siPrisma),
   firebase: entry(siFirebase),
   clerk: entry(siClerk),
+  expo: entry(siExpo),
 
   /* Referenced only by free-form contribution tech labels — see
      lib/tech-labels.ts, which maps those labels onto these slugs. */
