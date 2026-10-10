@@ -43,10 +43,8 @@
   --ring: var(--accent);
 
   /* --- Paper --------------------------------------------------------------
-     Ink-on-white values for the two places this document leaves the screen:
-     the print stylesheet, and the `.cv-paper` class the PDF capture applies to
-     its clone. Defined once here so the printed CV and the downloaded PDF
-     cannot drift apart.
+     Ink-on-white values for the browser print stylesheet. The site is dark
+     only, so these values keep printed CV text legible on white paper.
 
      Not a light theme — nothing below is reachable in the browser. The accent
      has to move because #00d9a3 sits at roughly 1.7:1 on white and would
@@ -329,25 +327,6 @@
 
 @page {
   margin: 15mm;
-}
-
-/* Applied to the cloned node during PDF capture, never to the live page — the
-   screen keeps its dark palette while the export comes out as ink on paper. */
-.cv-paper {
-  color-scheme: light;
-  --background: var(--paper-background);
-  --surface: var(--paper-background);
-  --surface-raised: var(--paper-background);
-  --foreground: var(--paper-foreground);
-  --muted: var(--paper-muted);
-  --border: var(--paper-border);
-  --border-strong: var(--paper-border-strong);
-  --accent: var(--paper-accent);
-  --link: var(--paper-link);
-  --warning: var(--paper-warning);
-
-  background-color: var(--paper-background);
-  color: var(--paper-foreground);
 }
 
 /* ==========================================================================

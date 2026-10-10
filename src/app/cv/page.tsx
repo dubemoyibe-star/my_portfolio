@@ -66,12 +66,11 @@ export default async function CvPage() {
         >
           &larr; Back to site
         </Link>
-        <CvDownload targetId="cv-document" fileName={profile.resume.fileName} />
+        <CvDownload fileName={profile.resume.fileName} />
       </div>
 
       <div id="cv-document">
         <header
-          data-cv-block
           className="mt-10 border-b border-border pb-8 print:mt-0 print:pb-6"
         >
           <h1 className="text-h2">{profile.name}</h1>
@@ -136,7 +135,7 @@ export default async function CvPage() {
         </header>
 
         <CvSection title="Summary">
-          <p data-cv-block className="text-pretty">
+          <p className="text-pretty">
             {profile.resume.summary}
           </p>
         </CvSection>
@@ -149,7 +148,6 @@ export default async function CvPage() {
               return (
                 <article
                   key={entry.id}
-                  data-cv-block
                   className="print:break-inside-avoid"
                 >
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -220,7 +218,6 @@ export default async function CvPage() {
             {projects.map((project) => (
               <article
                 key={project.id}
-                data-cv-block
                 className="print:break-inside-avoid"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -267,7 +264,6 @@ export default async function CvPage() {
             {contributions.map((entry) => (
               <article
                 key={entry.id}
-                data-cv-block
                 className="print:break-inside-avoid"
               >
                 <h3 className="text-h5">
@@ -295,7 +291,7 @@ export default async function CvPage() {
 
         {skills.length > 0 ? (
           <CvSection title="Skills">
-            <dl data-cv-block className="flex flex-col gap-4">
+            <dl className="flex flex-col gap-4">
               {skills.map((group) => (
                 <div
                   key={group.label}
@@ -316,7 +312,6 @@ export default async function CvPage() {
             {education.map((entry) => (
               <article
                 key={entry.id}
-                data-cv-block
                 className="print:break-inside-avoid"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -338,7 +333,7 @@ export default async function CvPage() {
             {/* The note, not a certificate list: printing each certificate
                 inline would push the actual work onto a second page. The
                 detail lives in the site's Education section. */}
-            <p data-cv-block className="text-small text-muted">
+            <p className="text-small text-muted">
               {resume.educationNote}
               {resume.certifications.length > 0 ? (
                 <>
