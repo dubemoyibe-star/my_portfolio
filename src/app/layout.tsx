@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
@@ -130,6 +131,7 @@ export default function RootLayout({
         </main>
 
         <SiteFooter />
+        <Analytics />
       </body>
     </html>
   );

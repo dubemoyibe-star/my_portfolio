@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { track } from "@vercel/analytics";
 
 import { DownloadIcon } from "@/components/ui/download-icon";
 
@@ -244,6 +245,7 @@ export function CvDownload({ targetId, fileName }: CvDownloadProps) {
     });
 
     pdf.save(`${fileName}.pdf`);
+    track("CV Download", { fileName });
     close();
   };
 
