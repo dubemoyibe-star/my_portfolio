@@ -39,6 +39,7 @@ export async function generateMetadata({
     imageWidth: post.cover.width,
     imageHeight: post.cover.height,
     ogType: "article",
+    publishedAt: post.publishedAt,
   });
 }
 
@@ -62,9 +63,28 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
     { name: "DEV Community", icon: "devdotto", href: "https://dev.to/new", copyFirst: true },
     { name: "Substack", icon: "substack", href: "https://substack.com/notes", copyFirst: true },
   ];
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+    headline: post.title,
+    description: post.excerpt,
+    image: new URL(post.cover.src, siteConfig.url).toString(),
+    ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
+    author: { "@id": `${siteConfig.url}/#person` },
+    publisher: { "@id": `${siteConfig.url}/#person` },
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+    inLanguage: "en",
+  };
 
   return (
     <article className="pb-12 lg:pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className="border-b border-border bg-surface/35">
         <Container className="py-10 lg:py-14">
           <Link

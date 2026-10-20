@@ -40,8 +40,8 @@ export type OgImage = {
  * is not.
  */
 const OG_FILES = {
-  home: { url: "/og-home.png", width: 1200, height: 630 },
-  cv: { url: "/og-cv.png", width: 1200, height: 630 },
+  home: { url: "/opengraph-image", width: 1200, height: 630 },
+  cv: { url: "/cv/opengraph-image", width: 1200, height: 630 },
   projects: {
     url: "/projects/opengraph-image",
     width: 1200,
@@ -94,6 +94,7 @@ export type PageSeo = {
   imageWidth?: number;
   imageHeight?: number;
   ogType?: "website" | "article";
+  publishedAt?: string;
 };
 
 export async function pageMetadata({
@@ -106,13 +107,17 @@ export async function pageMetadata({
   imageWidth,
   imageHeight,
   ogType = "website",
+  publishedAt,
 }: PageSeo): Promise<Metadata> {
   const identity = await getSiteIdentity();
   const shareImage = imageUrl
     ? {
         url: imageUrl,
-        width: imageWidth ?? 1200,
-        height: imageHeight ?? 630,
+        /* Content covers render with these intrinsic fallbacks in the project
+           and article pages, so their social metadata must report the same
+           ratio when an upload has no stored dimensions. */
+        width: imageWidth ?? 1349,
+        height: imageHeight ?? 632,
         alt: imageAlt ?? title,
       }
     : ogImage(image, identity);
@@ -133,13 +138,19 @@ export async function pageMetadata({
       title,
       description,
       images: [shareImage],
+      ...(ogType === "article" && publishedAt
+        ? {
+            publishedTime: `${publishedAt}T00:00:00.000Z`,
+            authors: [identity.name],
+          }
+        : {}),
     },
 
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [shareImage.url],
+      images: [{ url: shareImage.url, alt: shareImage.alt }],
     },
   };
 }
