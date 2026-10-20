@@ -53,11 +53,12 @@ export default async function ProjectsPage() {
       </div>
 
       {projects.length > 0 ? (
-        <div className="mt-8 flex flex-col gap-6">
-          {projects.map((project) => (
+        <div className="mt-8">
+          {projects.map((project, index) => (
             <ProjectListCard
               key={project.id}
               project={project}
+              index={index}
               tech={project.tech
                 .map((id) => techIndex[id])
                 .filter((item) => Boolean(item))}
