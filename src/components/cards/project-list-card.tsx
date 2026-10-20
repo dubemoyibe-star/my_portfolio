@@ -20,10 +20,10 @@ export function ProjectListCard({
   const imageFirst = index % 2 === 0;
 
   return (
-    <article className="border-b border-border py-8 first:border-t lg:py-10">
+    <article className="group border-b border-border py-8 first:border-t lg:py-10">
       <div className="grid items-center gap-7 lg:grid-cols-12 lg:gap-10">
         <div
-          className={`overflow-hidden rounded-md border border-border bg-surface-raised lg:col-span-7 ${imageFirst ? "lg:order-1" : "lg:order-2"}`}
+          className={`overflow-hidden rounded-md border border-border bg-surface-raised lg:col-span-8 ${imageFirst ? "lg:order-1" : "lg:order-2"}`}
         >
           {cover ? (
             <Image
@@ -31,8 +31,8 @@ export function ProjectListCard({
               alt={cover.alt}
               width={cover.width ?? 1349}
               height={cover.height ?? 632}
-              sizes="(min-width: 1024px) 58vw, 100vw"
-              className="block h-auto w-full"
+              sizes="(min-width: 1024px) 66vw, 100vw"
+              className="block h-auto w-full scale-100 object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
             <div className="flex aspect-[64/30] items-center justify-center p-8">
@@ -44,7 +44,7 @@ export function ProjectListCard({
         </div>
 
         <div
-          className={`flex flex-col lg:col-span-5 ${imageFirst ? "lg:order-2" : "lg:order-1"}`}
+          className={`flex flex-col lg:col-span-4 ${imageFirst ? "lg:order-2" : "lg:order-1"}`}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
