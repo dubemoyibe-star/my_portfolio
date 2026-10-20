@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
+import { ReadingTime } from "@/components/ui/reading-time";
 import { getBlogPosts } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 import { getSiteIdentity } from "@/lib/site-identity";
-import { estimateReadingTime } from "@/lib/blog";
 
 export async function generateMetadata(): Promise<Metadata> {
   const identity = await getSiteIdentity();
@@ -53,7 +53,7 @@ export default async function BlogPage() {
           <article className="mt-5 grid overflow-hidden rounded-lg border border-border bg-surface lg:grid-cols-12">
             <Link
               href={`/blog/${latest.slug}`}
-              className="group relative block overflow-hidden border-b border-border bg-surface-raised lg:col-span-7 lg:border-b-0 lg:border-r"
+              className="group relative block aspect-[64/30] min-h-52 overflow-hidden border-b border-border bg-surface-raised lg:col-span-7 lg:aspect-auto lg:min-h-0 lg:border-b-0 lg:border-r"
               aria-label={`Read ${latest.title}`}
             >
               <Image
@@ -63,12 +63,12 @@ export default async function BlogPage() {
                 height={latest.cover.height ?? 632}
                 sizes="(min-width: 1024px) 56vw, 100vw"
                 priority
-                className="block h-auto w-full transition-transform duration-500 ease-out group-hover:scale-105"
+                className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
               />
             </Link>
             <div className="flex flex-col justify-center p-6 sm:p-8 lg:col-span-5 lg:p-10">
               <p className="label text-muted">
-                {displayDate(latest.publishedAt)} <span aria-hidden="true">·</span> {estimateReadingTime(latest.content)}
+                {displayDate(latest.publishedAt)} <span aria-hidden="true">·</span> <ReadingTime content={latest.content} />
               </p>
               <h2 id="latest-writing" className="mt-5 text-h3 text-balance">
                 <Link
@@ -104,7 +104,7 @@ export default async function BlogPage() {
                 <span className="font-mono text-small text-accent">{String(index + 2).padStart(2, "0")}</span>
                 <div>
                   <p className="label text-muted">
-                    {displayDate(post.publishedAt)} <span aria-hidden="true">·</span> {estimateReadingTime(post.content)}
+                    {displayDate(post.publishedAt)} <span aria-hidden="true">·</span> <ReadingTime content={post.content} />
                   </p>
                   <h3 className="mt-2 text-h5">
                     <Link href={`/blog/${post.slug}`} className="transition-colors hover:text-link">

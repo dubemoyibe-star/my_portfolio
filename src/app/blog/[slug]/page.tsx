@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/container";
 import { Markdown } from "@/components/ui/markdown";
-import { estimateReadingTime } from "@/lib/blog";
+import { ReadingTime } from "@/components/ui/reading-time";
 import { getBlogPostBySlug } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 
@@ -45,49 +45,65 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
   if (!post) notFound();
 
   return (
-    <article>
-      <Container className="py-12 lg:py-20">
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"
-        >
-          <span aria-hidden="true">←</span> All writing
-        </Link>
-
-        <header className="mt-12 max-w-prose-page">
-          <p className="label text-muted">
-            {displayDate(post.publishedAt)} <span aria-hidden="true">·</span> {estimateReadingTime(post.content)}
-          </p>
-          <h1 className="mt-5 text-balance">{post.title}</h1>
-          <p className="mt-6 text-pretty text-body-lg text-muted">
-            {post.excerpt}
-          </p>
-        </header>
-
-        <figure className="mt-8 max-w-lg overflow-hidden rounded-lg border border-border bg-surface-raised">
-          <Image
-            src={post.cover.src}
-            alt={post.cover.alt}
-            width={post.cover.width ?? 1349}
-            height={post.cover.height ?? 632}
-            sizes="(min-width: 1152px) 512px, 100vw"
-            priority
-            className="block h-auto w-full"
-          />
-        </figure>
-
-        <div className="mt-12 max-w-prose-page">
-          <Markdown text={post.content} />
-        </div>
-
-        <footer className="mt-14 max-w-prose-page border-t border-border pt-6">
+    <article className="pb-12 lg:pb-20">
+      <section className="border-b border-border bg-surface/35">
+        <Container className="py-10 lg:py-14">
           <Link
             href="/blog"
             className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"
           >
-            <span aria-hidden="true">←</span> More writing
+            <span aria-hidden="true">&larr;</span> Blog archive
           </Link>
-        </footer>
+
+          <div className="mt-10 grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.62fr)] lg:gap-12">
+            <header className="max-w-prose-page">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 label text-muted">
+                <time dateTime={post.publishedAt}>{displayDate(post.publishedAt)}</time>
+                <span aria-hidden="true" className="text-border-strong">/</span>
+                <ReadingTime content={post.content} />
+              </div>
+              <h1 className="mt-6 text-balance">{post.title}</h1>
+              <p className="mt-5 text-pretty text-body-lg text-muted">
+                {post.excerpt}
+              </p>
+            </header>
+
+            <figure className="max-w-md overflow-hidden rounded-lg border border-border bg-surface-raised lg:justify-self-end lg:w-full">
+              <Image
+                src={post.cover.src}
+                alt={post.cover.alt}
+                width={post.cover.width ?? 1349}
+                height={post.cover.height ?? 632}
+                sizes="(min-width: 1024px) 32vw, (min-width: 640px) 512px, 100vw"
+                priority
+                className="block h-auto w-full"
+              />
+            </figure>
+          </div>
+        </Container>
+      </section>
+
+      <Container className="py-10 lg:py-16">
+        <div className="mx-auto max-w-prose-page overflow-hidden rounded-xl border border-border bg-surface shadow-lg shadow-black/10">
+          <div className="border-b border-border px-6 py-3.5 sm:px-10">
+            <p className="label text-muted">
+              <span className="text-accent">/</span> Article
+            </p>
+          </div>
+
+          <div className="px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+            <Markdown text={post.content} />
+          </div>
+
+          <footer className="border-t border-border bg-background/40 px-6 py-5 sm:px-10">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"
+            >
+              <span aria-hidden="true">&larr;</span> Back to all articles
+            </Link>
+          </footer>
+        </div>
       </Container>
     </article>
   );
