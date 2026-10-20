@@ -80,7 +80,9 @@ export async function SiteHeader() {
                     </a>
                   </li>
                 ))}
-                <li><SupportMeButton /></li>
+                <li>
+                  <SupportMeButton className="h-auto" />
+                </li>
               </ul>
             </nav>
           ) : null}

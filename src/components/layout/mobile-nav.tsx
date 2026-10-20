@@ -197,12 +197,14 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                           </a>
                         </li>
                       ))}
+                      <li>
+                        <SupportMeButton className="h-auto w-full py-3 text-foreground hover:text-link" />
+                      </li>
                     </ul>
                   </nav>
                 ) : null}
 
                 <div className="mt-4 flex flex-col gap-4 border-t border-border pt-5">
-                  <SupportMeButton className="h-11 w-full" />
                   <Link
                     href={cvHref}
                     onClick={() => setOpen(false)}
