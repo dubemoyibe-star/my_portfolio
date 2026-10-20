@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { profile as seedProfile } from "@/data/profile";
 import { siteConfig } from "@/data/site";
-import { getProjectSlugs } from "@/lib/data";
+import { getBlogPostSlugs, getProjectSlugs } from "@/lib/data";
 import { resolveProfile } from "@/lib/site-identity";
 
 /**
@@ -39,13 +39,12 @@ async function lastModified(): Promise<Date> {
 /**
  * The sitemap, served at /sitemap.xml.
  *
- * Two routes, because there are two: education and certifications are a
- * section of the home page (`/#education`), not a destination of their own, and
- * listing a fragment here would claim a page that does not exist. When a real
- * route is added, it gets a line here — not an entry per anchor.
+ * Public destinations and published content routes. Education and
+ * certifications remain sections of the home page (`/#education`), not
+ * destinations of their own, so fragments are intentionally omitted.
  *
- * The URLs are static; the only thing here that has ever needed the database
- * is `lastModified`, and it degrades on its own rather than blocking.
+ * Slugs come from the content tables. The profile date degrades on its own
+ * rather than blocking the sitemap when the profile store is unavailable.
  *
  * That date is `profile.resume.updatedAt` rather than `new Date()`. A
  * build-time timestamp tells a crawler the content changed every time the site
@@ -53,9 +52,10 @@ async function lastModified(): Promise<Date> {
  * actually revised is the thing worth reporting.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [modified, projectSlugs] = await Promise.all([
+  const [modified, projectSlugs, blogSlugs] = await Promise.all([
     lastModified(),
     getProjectSlugs(),
+    getBlogPostSlugs(),
   ]);
 
   return [
@@ -79,6 +79,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...projectSlugs.map((slug) => ({
       url: `${siteConfig.url}/projects/${slug}`,
+      lastModified: modified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+    {
+      url: `${siteConfig.url}/blog`,
+      lastModified: modified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    ...blogSlugs.map((slug) => ({
+      url: `${siteConfig.url}/blog/${slug}`,
       lastModified: modified,
       changeFrequency: "monthly" as const,
       priority: 0.7,

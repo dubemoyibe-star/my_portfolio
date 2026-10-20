@@ -31,7 +31,7 @@ export type OgImage = {
 };
 
 /**
- * The share cards. Both are 1200x630 — the size every crawler crops to, so
+ * The share cards are 1200x630 — the size every crawler crops to, so
  * anything else gets letterboxed or trimmed by the platform instead of by us.
  *
  * Only the file and its dimensions are fixed here. The alt text names the
@@ -44,6 +44,11 @@ const OG_FILES = {
   cv: { url: "/og-cv.png", width: 1200, height: 630 },
   projects: {
     url: "/projects/opengraph-image",
+    width: 1200,
+    height: 630,
+  },
+  blog: {
+    url: "/blog/opengraph-image",
     width: 1200,
     height: 630,
   },
@@ -66,7 +71,9 @@ export function ogImage(kind: OgImageKind, identity: SiteIdentity): OgImage {
         ? `The CV of ${identity.name}`
         : kind === "projects"
           ? `Selected projects by ${identity.name}`
-          : `${identity.name} - ${identity.role}`,
+          : kind === "blog"
+            ? `Writing by ${identity.name}`
+            : `${identity.name} - ${identity.role}`,
   };
 }
 
@@ -81,11 +88,12 @@ export type PageSeo = {
   /** Root-relative, no trailing slash. Becomes the canonical. */
   path: string;
   image: OgImageKind;
-  /** A project cover, when the page has its own share artwork. */
+  /** A content cover, when the page has its own share artwork. */
   imageUrl?: string;
   imageAlt?: string;
   imageWidth?: number;
   imageHeight?: number;
+  ogType?: "website" | "article";
 };
 
 export async function pageMetadata({
@@ -97,6 +105,7 @@ export async function pageMetadata({
   imageAlt,
   imageWidth,
   imageHeight,
+  ogType = "website",
 }: PageSeo): Promise<Metadata> {
   const identity = await getSiteIdentity();
   const shareImage = imageUrl
@@ -117,7 +126,7 @@ export async function pageMetadata({
     alternates: { canonical: path },
 
     openGraph: {
-      type: "website",
+      type: ogType,
       url: path,
       siteName: identity.name,
       locale: "en_US",

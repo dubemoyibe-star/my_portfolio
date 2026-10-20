@@ -43,11 +43,11 @@ import { prisma } from "@/lib/prisma";
 /**
  * Which of these sources are still pointed at by some row.
  *
- * Four queries rather than one join: these are unrelated tables with no
+ * Five queries rather than one join: these are unrelated tables with no
  * relationship to each other, and the sets involved are a handful of strings.
  */
 async function stillReferenced(sources: string[]): Promise<Set<string>> {
-  const [projectImages, certifications, profiles] = await Promise.all([
+  const [projectImages, certifications, profiles, blogPosts] = await Promise.all([
     prisma.projectImage.findMany({
       where: { src: { in: sources } },
       select: { src: true },
@@ -65,6 +65,10 @@ async function stillReferenced(sources: string[]): Promise<Set<string>> {
       },
       select: { avatarSrc: true, avatarCompactSrc: true },
     }),
+    prisma.blogPost.findMany({
+      where: { coverSrc: { in: sources } },
+      select: { coverSrc: true },
+    }),
   ]);
 
   const held = new Set<string>();
@@ -76,6 +80,7 @@ async function stillReferenced(sources: string[]): Promise<Set<string>> {
     if (row.avatarSrc) held.add(row.avatarSrc);
     if (row.avatarCompactSrc) held.add(row.avatarCompactSrc);
   }
+  for (const row of blogPosts) held.add(row.coverSrc);
   return held;
 }
 

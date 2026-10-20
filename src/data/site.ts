@@ -6,6 +6,7 @@ export const siteConfig: SiteConfig = {
   nav: [
     { label: "Experience", href: "/#experience" },
     { label: "Projects", href: "/projects" },
+    { label: "Writing", href: "/blog" },
     { label: "Contributions", href: "/#contributions" },
     { label: "Stack", href: "/#stack" },
   ],

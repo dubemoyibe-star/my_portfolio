@@ -35,6 +35,13 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     ready: true,
   },
   {
+    href: "/admin/blog",
+    label: "Blog",
+    description: "Write, publish, and update articles and their share images.",
+    countLabel: "posts",
+    ready: true,
+  },
+  {
     href: "/admin/contributions",
     label: "Contributions",
     description:
