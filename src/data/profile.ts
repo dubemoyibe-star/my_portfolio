@@ -28,15 +28,16 @@ import type { Profile } from "@/types";
 export const profile = {
   name: "Oyibe Chidubem",
   tagline:
-    "Fullstack developer, blockchain developer, Web3 enthusiast, continuously learning while shipping products",
+    "Full-Stack Developer building websites, web applications, mobile apps and digital products that help businesses grow.",
 
   bio: {
     short:
-      "I'm a fullstack and blockchain developer from Nigeria. I like solving real problems, not just writing code for the sake of it, and I'm most interested in building applications that people actually use.",
+      "I build websites, web applications, and mobile apps that help businesses and startups reach more customers, increase sales, strengthen their online presence, and scale. I focus on turning ideas into practical digital products that solve real problems and deliver measurable value. I'm also a Web3 enthusiast and open-source contributor passionate about building useful products through technology.",
     long: [
-      "I'm a fullstack and blockchain developer from Nigeria. I like solving real problems, not just writing code for the sake of it, and I'm most interested in building applications that people actually use instead of portfolio pieces.",
-      "I'm continuously learning while shipping, with a growing focus on Web3 and decentralized technologies. Open source matters to me. I contribute where I can and prefer building in the open over building in isolation.",
-      "When I'm not building, I'm usually digging into whatever's next in the Web3 space: new tools, new chains, new problems worth solving.",
+      "I build websites, web applications, mobile apps, and digital products that help businesses and startups reach more customers, increase sales, strengthen their online presence, and scale.",
+      "I work with businesses, startups, and teams to turn ideas into practical, reliable digital solutions that solve real problems and deliver value. Beyond writing code, I focus on understanding business needs, creating great user experiences, and building products that people actually use.",
+      "I'm open to collaborating with founders, businesses, and teams to launch new products, improve existing platforms, and build solutions that create opportunities for growth.",
+      "Open source is an important part of my work. I contribute to projects and believe in building in the open. I'm also a Web3 enthusiast interested in exploring emerging technologies and the possibilities they bring.",
     ].join("\n\n"),
   },
 
@@ -103,7 +104,7 @@ export const profile = {
   resume: {
     title: "Fullstack developer",
     summary:
-      "Fullstack and blockchain developer with experience across TypeScript/JavaScript and Solidity/Foundry. Focused on building practical, user-facing applications and contributing to open-source projects, with a growing specialization in Web3 and decentralized technologies.",
+      "Full-Stack Developer experienced in building web applications and digital products using TypeScript, JavaScript, and modern development technologies. Focused on creating practical, user-centered solutions that solve real-world problems, contribute to open-source projects, and deliver value to businesses and users. Web3 enthusiast interested in blockchain technology and decentralized applications.",
     /* Derived from the name — change if you want a different download filename. */
     fileName: "oyibe-chidubem-cv",
     location: "Nigeria",
