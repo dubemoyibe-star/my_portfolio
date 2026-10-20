@@ -426,6 +426,7 @@ export type ResumeData = {
 export type NavItem = {
   label: string;
   href: string;
+  icon: "experience" | "projects" | "blog";
   /** Off-site links get target/rel handling and an external affordance. */
   external?: boolean;
 };

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
@@ -132,6 +133,10 @@ export default function RootLayout({
 
         <SiteFooter />
         <Analytics />
+        <Script
+          src="https://myhappr.com/widget.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

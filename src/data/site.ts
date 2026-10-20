@@ -4,9 +4,8 @@ import type { SiteConfig } from "@/types";
 export const siteConfig: SiteConfig = {
   url: "https://oyibe.dev",
   nav: [
-    { label: "Experience", href: "/#experience" },
-    { label: "Projects", href: "/projects" },
-    { label: "Contributions", href: "/#contributions" },
-    { label: "Blog", href: "/blog" },
+    { label: "Experience", href: "/#experience", icon: "experience" },
+    { label: "Projects", href: "/projects", icon: "projects" },
+    { label: "Blog", href: "/blog", icon: "blog" },
   ],
 };

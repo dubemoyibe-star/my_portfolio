@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { NavigationIcon } from "@/components/layout/navigation-icon";
+import { SupportMeButton } from "@/components/layout/support-me-button";
 import { DownloadIcon } from "@/components/ui/download-icon";
 import { Icon } from "@/components/ui/icon";
 import { siteConfig } from "@/data/site";
@@ -37,7 +39,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md print:hidden">
-      <Container className="flex h-16 items-center justify-between gap-4">
+      <Container className="flex h-[4.5rem] items-center justify-between gap-4">
         <Link
           href="/"
           className="group flex items-center gap-2.5 font-mono text-small tracking-tight"
@@ -71,12 +73,16 @@ export async function SiteHeader() {
                         from `/cv` — and it needs no JavaScript to do it. */}
                     <a
                       href={item.href}
-                      className="text-small text-muted transition-colors hover:text-foreground"
+                      className="inline-flex items-center gap-1.5 py-2 text-small text-muted transition-colors hover:text-foreground"
                     >
+                      <NavigationIcon name={item.icon} className="size-4" />
                       {item.label}
                     </a>
                   </li>
                 ))}
+                <li>
+                  <SupportMeButton className="h-auto" />
+                </li>
               </ul>
             </nav>
           ) : null}
