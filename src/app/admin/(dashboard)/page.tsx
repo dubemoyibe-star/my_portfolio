@@ -44,11 +44,12 @@ async function sectionCounts(): Promise<Record<string, number>> {
      already reading on it produces a P2028 "unable to start a transaction",
      which is what this page did until it stopped asking.
 
-     Nothing is lost: these are five independent counts with no consistency
+     Nothing is lost: these are six independent counts with no consistency
      requirement between them, and on a single connection they pipeline anyway. */
-  const [projects, contributions, tech, certifications, experience] =
+  const [projects, posts, contributions, tech, certifications, experience] =
     await Promise.all([
       prisma.project.count(),
+      prisma.blogPost.count(),
       prisma.contribution.count(),
       prisma.techStackItem.count(),
       prisma.certification.count(),
@@ -57,6 +58,7 @@ async function sectionCounts(): Promise<Record<string, number>> {
 
   return {
     "/admin/projects": projects,
+    "/admin/blog": posts,
     "/admin/contributions": contributions,
     "/admin/tech-stack": tech,
     "/admin/education": certifications,

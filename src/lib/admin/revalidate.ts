@@ -31,9 +31,12 @@ export function revalidatePublicContent(): void {
   /* All projects, plus every project detail route. */
   revalidatePath("/projects");
   revalidatePath("/projects/[slug]", "page");
+  /* Blog archive, article pages and share metadata. */
+  revalidatePath("/blog");
+  revalidatePath("/blog/[slug]", "page");
   /* The generated CV. */
   revalidatePath("/cv");
-  /* `sitemap.ts` derives its last-modified date from the profile row. */
+  /* `sitemap.ts` reads published slugs and the profile's last-modified date. */
   revalidatePath("/sitemap.xml");
   /* `llms.txt` is the whole content set in plain text, and is `force-static` —
      without this it would serve the build's copy until the next deploy. */

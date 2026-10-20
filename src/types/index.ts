@@ -164,6 +164,18 @@ export type Project = {
   order?: number;
 };
 
+/** A publishable long-form article. `content` is blank-line separated prose. */
+export type BlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  cover: ImageAsset;
+  published: boolean;
+  publishedAt?: ISODate;
+};
+
 /* ==========================================================================
    Experience
    ========================================================================== */

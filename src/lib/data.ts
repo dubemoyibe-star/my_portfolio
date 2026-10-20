@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import {
   TECH_CATEGORIES,
   type Certification,
+  type BlogPost,
   type ContactLink,
   type Contribution,
   type DateRange,
@@ -350,6 +351,63 @@ async function readProjects(): Promise<Project[]> {
     orderBy: { id: "asc" },
   });
   return rows.map(toProject);
+}
+
+function toBlogPost(row: {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverSrc: string;
+  coverAlt: string;
+  coverWidth: number | null;
+  coverHeight: number | null;
+  published: boolean;
+  publishedAt: Date | null;
+}): BlogPost {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    excerpt: row.excerpt,
+    content: row.content,
+    cover: {
+      src: row.coverSrc,
+      alt: row.coverAlt,
+      ...(row.coverWidth ? { width: row.coverWidth } : {}),
+      ...(row.coverHeight ? { height: row.coverHeight } : {}),
+    },
+    published: row.published,
+    ...(row.publishedAt
+      ? { publishedAt: row.publishedAt.toISOString().slice(0, 10) }
+      : {}),
+  };
+}
+
+/** Published writing, newest first. Drafts never leave the admin boundary. */
+export async function getBlogPosts(): Promise<BlogPost[]> {
+  const rows = await prisma.blogPost.findMany({
+    where: { published: true },
+    orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+  });
+  return rows.map(toBlogPost);
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  const row = await prisma.blogPost.findFirst({
+    where: { slug, published: true },
+  });
+  return row ? toBlogPost(row) : null;
+}
+
+export async function getBlogPostSlugs(): Promise<string[]> {
+  const rows = await prisma.blogPost.findMany({
+    where: { published: true },
+    select: { slug: true },
+    orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+  });
+  return rows.map((row) => row.slug);
 }
 
 async function readExperience(): Promise<Experience[]> {

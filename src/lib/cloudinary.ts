@@ -49,6 +49,7 @@ import { createHash } from "node:crypto";
 /** Fixed folder per section. Keeps the account tidy and the grant narrow. */
 export const UPLOAD_FOLDERS = {
   projects: "portfolio/projects",
+  blog: "portfolio/blog",
   certifications: "portfolio/certifications",
   profile: "portfolio/profile",
 } as const;

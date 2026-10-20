@@ -126,7 +126,7 @@ export async function PersonSchema() {
          future string value would still close the tag early, so the one
          sequence that can do that is escaped. */
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema).replace(/</g, "\u003c"),
+        __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
       }}
     />
   );

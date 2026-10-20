@@ -1,10 +1,12 @@
 import { ImageResponse } from "next/og";
+import { getSiteIdentity } from "@/lib/site-identity";
 
-export const alt = "Selected projects by Oyibe Chidubem";
+export const alt = "Selected projects from the portfolio";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const identity = await getSiteIdentity();
   return new ImageResponse(
     (
       <div
@@ -247,7 +249,7 @@ export default function OpenGraphImage() {
               fontFamily: "monospace",
             }}
           >
-            <div>OYIBE CHIDUBEM</div>
+            <div>{identity.name.toUpperCase()}</div>
             <div>oyibe.dev</div>
           </div>
         </div>
