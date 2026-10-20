@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/container";
 import { Markdown } from "@/components/ui/markdown";
 import { ReadingTime } from "@/components/ui/reading-time";
-import { Icon } from "@/components/ui/icon";
+import { ArticleShareLinks } from "@/components/blog/article-share-links";
 import { getBlogPostBySlug } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 import { getSiteIdentity } from "@/lib/site-identity";
@@ -55,8 +55,13 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
   const xShare = `https://twitter.com/intent/tweet?${new URLSearchParams({ text: shareText })}`;
   const facebookShare = `https://www.facebook.com/sharer/sharer.php?${new URLSearchParams({ u: articleUrl, quote: shareText })}`;
   const linkedInShare = `https://www.linkedin.com/sharing/share-offsite/?${new URLSearchParams({ url: articleUrl })}`;
-  const devToShare = `https://dev.to/new?${new URLSearchParams({ title: post.title, url: articleUrl, body_markdown: shareText })}`;
-  const substackShare = `https://substack.com/notes?${new URLSearchParams({ text: shareText, url: articleUrl })}`;
+  const networks = [
+    { name: "X", icon: "x", href: xShare },
+    { name: "Facebook", icon: "facebook", href: facebookShare },
+    { name: "LinkedIn", icon: "linkedin", href: linkedInShare, copyFirst: true },
+    { name: "DEV Community", icon: "devdotto", href: "https://dev.to/new", copyFirst: true },
+    { name: "Substack", icon: "substack", href: "https://substack.com/notes", copyFirst: true },
+  ];
 
   return (
     <article className="pb-12 lg:pb-20">
@@ -119,28 +124,7 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
               >
                 <span aria-hidden="true">&larr;</span> Back to all articles
               </Link>
-              <nav aria-label="Share this article" className="flex flex-wrap items-center gap-2">
-                <span className="label mr-1 text-muted">Share</span>
-                {[
-                  { name: "X", icon: "x", href: xShare },
-                  { name: "Facebook", icon: "facebook", href: facebookShare },
-                  { name: "LinkedIn", icon: "linkedin", href: linkedInShare },
-                  { name: "DEV Community", icon: "devdotto", href: devToShare },
-                  { name: "Substack", icon: "substack", href: substackShare },
-                ].map((network) => (
-                  <a
-                    key={network.name}
-                    href={network.href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    aria-label={`Share on ${network.name}`}
-                    title={`Share on ${network.name}`}
-                    className="inline-flex size-10 items-center justify-center rounded-md border border-border text-foreground transition-colors hover:border-border-strong hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
-                  >
-                    <Icon name={network.icon} className="size-4" />
-                  </a>
-                ))}
-              </nav>
+              <ArticleShareLinks shareText={shareText} networks={networks} />
             </div>
           </footer>
         </div>
