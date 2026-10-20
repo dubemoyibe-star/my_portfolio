@@ -73,7 +73,7 @@ export async function SiteHeader() {
                         from `/cv` — and it needs no JavaScript to do it. */}
                     <a
                       href={item.href}
-                      className="inline-flex items-center gap-1.5 text-small text-muted transition-colors hover:text-foreground"
+                      className="inline-flex items-center gap-1.5 py-2 text-small text-muted transition-colors hover:text-foreground"
                     >
                       <NavigationIcon name={item.icon} className="size-3.5" />
                       {item.label}
