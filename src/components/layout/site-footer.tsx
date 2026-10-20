@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 
@@ -5,6 +6,7 @@ import { BackToTopLink } from "@/components/layout/back-to-top-link";
 import { Container } from "@/components/layout/container";
 import { Icon } from "@/components/ui/icon";
 import { siteConfig } from "@/data/site";
+import { getProfile } from "@/lib/data";
 import { getSiteIdentity } from "@/lib/site-identity";
 
 /** Site close: a clear way back into the work, plus the live social links. */
@@ -13,7 +15,11 @@ export async function SiteFooter() {
      route. Read this shared identity at request time so the footer follows the
      current profile record instead of a build-time snapshot. */
   await connection();
-  const identity = await getSiteIdentity();
+  const [identity, profile] = await Promise.all([
+    getSiteIdentity(),
+    getProfile(),
+  ]);
+  const mark = profile.avatarCompact ?? profile.avatar;
 
   return (
     <footer className="relative z-10 mt-auto border-t border-border print:hidden">
@@ -21,7 +27,15 @@ export async function SiteFooter() {
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16">
           <div className="max-w-prose-page">
             <p className="label flex items-center gap-3 text-muted">
-              <span aria-hidden="true" className="h-px w-7 bg-accent" />
+              {mark ? (
+                <Image
+                  src={mark.src}
+                  alt=""
+                  width={mark.width ?? 200}
+                  height={mark.height ?? 200}
+                  className="size-7 shrink-0 rounded-full border border-border object-cover"
+                />
+              ) : null}
               Thanks for stopping by
             </p>
             <p className="mt-5 text-h3 text-foreground">{identity.name}</p>
