@@ -6,6 +6,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { DownloadIcon } from "@/components/ui/download-icon";
+import { NavigationIcon } from "@/components/layout/navigation-icon";
+import { SupportMeButton } from "@/components/layout/support-me-button";
 import { Icon } from "@/components/ui/icon";
 import { sameDocumentHash } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -190,10 +192,7 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                             }
                             className="flex items-center gap-3 py-3 text-foreground transition-colors hover:text-link"
                           >
-                            <span
-                              aria-hidden="true"
-                              className="h-px w-4 bg-accent"
-                            />
+                            <NavigationIcon name={item.icon} className="size-4 text-accent" />
                             {item.label}
                           </a>
                         </li>
@@ -203,6 +202,7 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                 ) : null}
 
                 <div className="mt-4 flex flex-col gap-4 border-t border-border pt-5">
+                  <SupportMeButton className="h-11 w-full" />
                   <Link
                     href={cvHref}
                     onClick={() => setOpen(false)}
