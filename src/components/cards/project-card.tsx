@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Disclosure } from "@/components/ui/disclosure";
 import { LinkButton } from "@/components/ui/link-button";
@@ -60,7 +61,14 @@ export function ProjectCard({ project, tech }: ProjectCardProps) {
           </span>
         </div>
 
-        <h3 className="mt-4 text-h4">{project.title}</h3>
+        <h3 className="mt-4 text-h4">
+          <Link
+            href={`/projects/${project.slug}`}
+            className="transition-colors hover:text-link"
+          >
+            {project.title}
+          </Link>
+        </h3>
 
         <p className="mt-3 text-pretty text-muted">{project.summary}</p>
 

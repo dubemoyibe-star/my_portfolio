@@ -28,6 +28,9 @@ import { revalidatePath } from "next/cache";
 export function revalidatePublicContent(): void {
   /* Home page — every section reads content. */
   revalidatePath("/");
+  /* All projects, plus every project detail route. */
+  revalidatePath("/projects");
+  revalidatePath("/projects/[slug]", "page");
   /* The generated CV. */
   revalidatePath("/cv");
   /* `sitemap.ts` derives its last-modified date from the profile row. */

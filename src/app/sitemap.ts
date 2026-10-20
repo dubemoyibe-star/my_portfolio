@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { profile as seedProfile } from "@/data/profile";
 import { siteConfig } from "@/data/site";
+import { getProjectSlugs } from "@/lib/data";
 import { resolveProfile } from "@/lib/site-identity";
 
 /**
@@ -52,7 +53,10 @@ async function lastModified(): Promise<Date> {
  * actually revised is the thing worth reporting.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const modified = await lastModified();
+  const [modified, projectSlugs] = await Promise.all([
+    lastModified(),
+    getProjectSlugs(),
+  ]);
 
   return [
     {
@@ -67,5 +71,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${siteConfig.url}/projects`,
+      lastModified: modified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    ...projectSlugs.map((slug) => ({
+      url: `${siteConfig.url}/projects/${slug}`,
+      lastModified: modified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
   ];
 }

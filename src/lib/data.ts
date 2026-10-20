@@ -519,7 +519,7 @@ export async function getFeaturedProjects(limit?: number): Promise<Project[]> {
 }
 
 /**
- * Slugs for `generateStaticParams()` on `/work/[slug]`.
+ * Project slugs for the catalogue, sitemap and `/projects/[slug]` routes.
  *
  * Separate from `getProjects()` so it can be answered with a single-column
  * query instead of loading every record and its relations.

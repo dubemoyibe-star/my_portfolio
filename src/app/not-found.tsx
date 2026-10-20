@@ -24,7 +24,7 @@ const ROLE = "Fullstack & Blockchain Developer";
  */
 const DESTINATIONS = [
   { label: "Home", href: "/" },
-  { label: "Projects", href: "/#projects" },
+  { label: "Projects", href: "/projects" },
   { label: "Contributions", href: "/#contributions" },
   { label: "CV", href: "/cv" },
   { label: "Education", href: "/#education" },
