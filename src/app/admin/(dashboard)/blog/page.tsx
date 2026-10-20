@@ -82,6 +82,6 @@ function Th({ children, className }: { children: React.ReactNode; className?: st
   return <th scope="col" className={`label px-4 py-2.5 font-medium text-muted ${className ?? ""}`}>{children}</th>;
 }
 
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-4 py-3 ${className ?? ""}`}>{children}</td>;
+function Td({ children, className, title }: { children: React.ReactNode; className?: string; title?: string }) {
+  return <td title={title} className={`px-4 py-3 ${className ?? ""}`}>{children}</td>;
 }
