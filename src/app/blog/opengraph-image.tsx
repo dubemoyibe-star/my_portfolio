@@ -29,6 +29,8 @@ export default async function OpenGraphImage() {
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
+              display: "flex",
+              alignItems: "center",
               color: "#6b7680",
               fontSize: 19,
               letterSpacing: 3,
