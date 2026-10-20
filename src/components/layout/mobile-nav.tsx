@@ -178,7 +178,7 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                 aria-modal="true"
                 aria-label="Menu"
                 tabIndex={-1}
-                className="fixed inset-x-4 top-[4.5rem] z-50 max-h-[calc(100svh-6rem)] overflow-y-auto rounded-lg border border-border bg-surface p-5 shadow-2xl outline-none"
+                className="fixed inset-x-4 top-[5rem] z-50 max-h-[calc(100svh-6.5rem)] overflow-y-auto rounded-lg border border-border bg-surface p-5 shadow-2xl outline-none"
               >
                 {nav.length > 0 ? (
                   <nav aria-label="Primary">
@@ -190,7 +190,7 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                             onClick={(event) =>
                               handleNavClick(event, item.href)
                             }
-                            className="flex items-center gap-3 py-3 text-foreground transition-colors hover:text-link"
+                            className="flex items-center gap-3 py-3 text-small text-foreground transition-colors hover:text-link"
                           >
                             <NavigationIcon name={item.icon} className="size-4 text-accent" />
                             {item.label}
@@ -198,7 +198,10 @@ export function MobileNav({ nav, links, cvHref }: MobileNavProps) {
                         </li>
                       ))}
                       <li>
-                        <SupportMeButton className="h-auto w-full py-3 text-foreground hover:text-link" />
+                        <SupportMeButton
+                          className="h-auto w-full py-3 text-foreground hover:text-link"
+                          iconClassName="text-accent"
+                        />
                       </li>
                     </ul>
                   </nav>
