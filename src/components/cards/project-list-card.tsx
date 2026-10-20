@@ -20,7 +20,7 @@ export function ProjectListCard({
   const imageFirst = index % 2 === 0;
 
   return (
-    <article className="border-b border-border py-8 first:border-t lg:py-10">
+    <article className="border-b border-border py-8 lg:py-10">
       <div className="grid items-center gap-7 lg:grid-cols-12 lg:gap-10">
         <div
           className={`group overflow-hidden rounded-md border border-border bg-surface-raised lg:col-span-6 ${imageFirst ? "lg:order-1" : "lg:order-2"}`}
