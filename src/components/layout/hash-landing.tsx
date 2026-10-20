@@ -30,7 +30,14 @@ export function HashLanding() {
     if (!target) return;
 
     const frame = requestAnimationFrame(() => {
-      target.scrollIntoView({ behavior: "auto" });
+      /* `auto` normally inherits the site's global smooth behavior. Temporarily
+         switch it off so this post-navigation correction lands in one place
+         and does not compete with the browser's initial fragment scroll. */
+      const root = document.documentElement;
+      const previousBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      target.scrollIntoView();
+      root.style.scrollBehavior = previousBehavior;
     });
     return () => cancelAnimationFrame(frame);
   }, []);
