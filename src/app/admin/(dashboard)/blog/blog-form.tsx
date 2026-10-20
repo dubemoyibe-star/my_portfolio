@@ -64,7 +64,7 @@ export function BlogForm({
           <Field
             label="Article text"
             htmlFor="content"
-            hint="Separate paragraphs with a blank line."
+            hint="Markdown supported: headings, links, lists, quotes, code and tables."
             required
             className="sm:col-span-2"
           >

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/container";
-import { Paragraphs } from "@/components/ui/paragraphs";
+import { Markdown } from "@/components/ui/markdown";
+import { estimateReadingTime } from "@/lib/blog";
 import { getBlogPostBySlug } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 
@@ -53,31 +54,33 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
           <span aria-hidden="true">←</span> All writing
         </Link>
 
-        <header className="mx-auto mt-12 max-w-prose-page">
-          <p className="label text-muted">{displayDate(post.publishedAt)}</p>
+        <header className="mt-12 max-w-prose-page">
+          <p className="label text-muted">
+            {displayDate(post.publishedAt)} <span aria-hidden="true">·</span> {estimateReadingTime(post.content)}
+          </p>
           <h1 className="mt-5 text-balance">{post.title}</h1>
           <p className="mt-6 text-pretty text-body-lg text-muted">
             {post.excerpt}
           </p>
         </header>
 
-        <figure className="mt-10 overflow-hidden rounded-lg border border-border bg-surface-raised">
+        <figure className="mt-8 max-w-lg overflow-hidden rounded-lg border border-border bg-surface-raised">
           <Image
             src={post.cover.src}
             alt={post.cover.alt}
             width={post.cover.width ?? 1349}
             height={post.cover.height ?? 632}
-            sizes="(min-width: 1152px) 1088px, 100vw"
+            sizes="(min-width: 1152px) 512px, 100vw"
             priority
             className="block h-auto w-full"
           />
         </figure>
 
-        <div className="mx-auto mt-12 max-w-prose-page border-l border-accent/50 pl-5 sm:pl-8">
-          <Paragraphs text={post.content} className="text-body leading-8 text-muted" />
+        <div className="mt-12 max-w-prose-page">
+          <Markdown text={post.content} />
         </div>
 
-        <footer className="mx-auto mt-14 max-w-prose-page border-t border-border pt-6">
+        <footer className="mt-14 max-w-prose-page border-t border-border pt-6">
           <Link
             href="/blog"
             className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"

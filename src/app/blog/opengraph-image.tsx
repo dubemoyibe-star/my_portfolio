@@ -4,7 +4,7 @@ import { getSiteIdentity } from "@/lib/site-identity";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Writing on building products and the decisions behind the work";
+export const alt = "Ideas worth building on: business, technology, and useful digital products";
 
 export default async function OpenGraphImage() {
   const identity = await getSiteIdentity();
@@ -27,7 +27,6 @@ export default async function OpenGraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 34, height: 3, background: "#00d9a3" }} />
           <div
             style={{
               color: "#6b7680",
@@ -36,16 +35,18 @@ export default async function OpenGraphImage() {
               textTransform: "uppercase",
             }}
           >
-            Portfolio / Journal
+            {identity.name.toUpperCase()}{" "}
+            <span style={{ color: "#00d9a3" }}>/</span>{" "}
+            BLOG
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-          <div style={{ fontSize: 96, fontWeight: 600, letterSpacing: -5 }}>
-            Notes from the build
+          <div style={{ fontSize: 86, fontWeight: 600, letterSpacing: -4 }}>
+            Ideas worth building on.
           </div>
           <div style={{ color: "#8a949d", fontSize: 30, lineHeight: 1.4 }}>
-            Ideas, lessons, and details behind the work.
+            Business, technology, and building useful digital products.
           </div>
         </div>
 
@@ -61,7 +62,7 @@ export default async function OpenGraphImage() {
           }}
         >
           <div>{identity.name.toUpperCase()}</div>
-          <div>oyibe.dev / writing</div>
+          <div>oyibe.dev / blog</div>
         </div>
       </div>
     ),

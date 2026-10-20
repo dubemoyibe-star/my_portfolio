@@ -72,7 +72,7 @@ export function ogImage(kind: OgImageKind, identity: SiteIdentity): OgImage {
         : kind === "projects"
           ? `Selected projects by ${identity.name}`
           : kind === "blog"
-            ? `Writing by ${identity.name}`
+            ? `Ideas worth building on. - ${identity.name}`
             : `${identity.name} - ${identity.role}`,
   };
 }
