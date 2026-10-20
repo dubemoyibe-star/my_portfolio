@@ -101,7 +101,7 @@ export const profile = {
   ],
 
   resume: {
-    title: "Fullstack web developer and blockchain developer",
+    title: "Fullstack developer",
     summary:
       "Fullstack and blockchain developer with experience across TypeScript/JavaScript and Solidity/Foundry. Focused on building practical, user-facing applications and contributing to open-source projects, with a growing specialization in Web3 and decentralized technologies.",
     /* Derived from the name — change if you want a different download filename. */
