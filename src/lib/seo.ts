@@ -42,6 +42,11 @@ export type OgImage = {
 const OG_FILES = {
   home: { url: "/og-home.png", width: 1200, height: 630 },
   cv: { url: "/og-cv.png", width: 1200, height: 630 },
+  projects: {
+    url: "/projects/opengraph-image",
+    width: 1200,
+    height: 630,
+  },
 } as const;
 
 export type OgImageKind = keyof typeof OG_FILES;
@@ -59,7 +64,9 @@ export function ogImage(kind: OgImageKind, identity: SiteIdentity): OgImage {
     alt:
       kind === "cv"
         ? `The CV of ${identity.name}`
-        : `${identity.name} - ${identity.role}`,
+        : kind === "projects"
+          ? `Selected projects by ${identity.name}`
+          : `${identity.name} - ${identity.role}`,
   };
 }
 
@@ -71,9 +78,14 @@ export type PageSeo = {
    */
   title: string;
   description: string;
-  /** Root-relative, no trailing slash: `/` or `/cv`. Becomes the canonical. */
+  /** Root-relative, no trailing slash. Becomes the canonical. */
   path: string;
   image: OgImageKind;
+  /** A project cover, when the page has its own share artwork. */
+  imageUrl?: string;
+  imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
 export async function pageMetadata({
@@ -81,8 +93,20 @@ export async function pageMetadata({
   description,
   path,
   image,
+  imageUrl,
+  imageAlt,
+  imageWidth,
+  imageHeight,
 }: PageSeo): Promise<Metadata> {
   const identity = await getSiteIdentity();
+  const shareImage = imageUrl
+    ? {
+        url: imageUrl,
+        width: imageWidth ?? 1200,
+        height: imageHeight ?? 630,
+        alt: imageAlt ?? title,
+      }
+    : ogImage(image, identity);
 
   return {
     title: { absolute: title },
@@ -99,14 +123,14 @@ export async function pageMetadata({
       locale: "en_US",
       title,
       description,
-      images: [ogImage(image, identity)],
+      images: [shareImage],
     },
 
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [OG_FILES[image].url],
+      images: [shareImage.url],
     },
   };
 }
