@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 
+import { siteConfig } from "@/data/site";
+import { getProfile } from "@/lib/data";
 import { getSiteIdentity } from "@/lib/site-identity";
 
 export const alt = "Portfolio profile";
@@ -7,7 +9,14 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
-  const identity = await getSiteIdentity();
+  const [identity, profile] = await Promise.all([
+    getSiteIdentity(),
+    getProfile(),
+  ]);
+  const portrait = profile.avatarCompact ?? profile.avatar;
+  const portraitUrl = portrait
+    ? new URL(portrait.src, siteConfig.url).toString()
+    : null;
 
   return new ImageResponse(
     (
@@ -34,20 +43,45 @@ export default async function OpenGraphImage() {
         >
           Portfolio / Profile
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <div
-            style={{
-              fontSize: 82,
-              fontWeight: 600,
-              letterSpacing: -3,
-              lineHeight: 1.05,
-            }}
-          >
-            {identity.name}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 36,
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 18, width: 620 }}>
+            <div
+              style={{
+                fontSize: 74,
+                fontWeight: 600,
+                letterSpacing: -3,
+                lineHeight: 1.05,
+              }}
+            >
+              {identity.name}
+            </div>
+            <div style={{ color: "#8a949d", fontSize: 32 }}>
+              {identity.role}
+            </div>
           </div>
-          <div style={{ color: "#8a949d", fontSize: 34 }}>
-            {identity.role}
-          </div>
+          {portraitUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={portraitUrl}
+              alt={portrait?.alt || `picture of ${profile.name}`}
+              width={370}
+              height={370}
+              style={{
+                width: 370,
+                height: 370,
+                borderRadius: 999,
+                border: "4px solid #00d9a3",
+                objectFit: "cover",
+              }}
+            />
+          ) : null}
         </div>
         <div
           style={{
