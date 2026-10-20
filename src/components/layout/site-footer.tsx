@@ -59,6 +59,16 @@ export async function SiteFooter() {
                       </Link>
                     </li>
                   ))}
+                  <li>
+                    <Link href="/#stack" className="text-small text-foreground transition-colors hover:text-link">
+                      Tech Stack
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/#education" className="text-small text-foreground transition-colors hover:text-link">
+                      Education
+                    </Link>
+                  </li>
                 </ul>
               </nav>
             ) : null}
@@ -89,6 +99,7 @@ export async function SiteFooter() {
                 </ul>
               </nav>
             ) : null}
+
           </div>
         </div>
 

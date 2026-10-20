@@ -6,8 +6,11 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/container";
 import { Markdown } from "@/components/ui/markdown";
 import { ReadingTime } from "@/components/ui/reading-time";
+import { Icon } from "@/components/ui/icon";
 import { getBlogPostBySlug } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
+import { getSiteIdentity } from "@/lib/site-identity";
+import { siteConfig } from "@/data/site";
 
 type BlogArticleProps = { params: Promise<{ slug: string }> };
 
@@ -41,8 +44,19 @@ export async function generateMetadata({
 
 export default async function BlogArticlePage({ params }: BlogArticleProps) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const [post, identity] = await Promise.all([
+    getBlogPostBySlug(slug),
+    getSiteIdentity(),
+  ]);
   if (!post) notFound();
+
+  const articleUrl = `${siteConfig.url}/blog/${post.slug}`;
+  const shareText = `${post.title}\nAn article by ${identity.name} on ${post.excerpt}\nRead more: ${articleUrl}`;
+  const xShare = `https://twitter.com/intent/tweet?${new URLSearchParams({ text: shareText })}`;
+  const facebookShare = `https://www.facebook.com/sharer/sharer.php?${new URLSearchParams({ u: articleUrl, quote: shareText })}`;
+  const linkedInShare = `https://www.linkedin.com/sharing/share-offsite/?${new URLSearchParams({ url: articleUrl })}`;
+  const devToShare = `https://dev.to/new?${new URLSearchParams({ title: post.title, url: articleUrl, body_markdown: shareText })}`;
+  const substackShare = `https://substack.com/notes?${new URLSearchParams({ text: shareText, url: articleUrl })}`;
 
   return (
     <article className="pb-12 lg:pb-20">
@@ -98,12 +112,36 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
           </div>
 
           <footer className="border-t border-border bg-background/40 px-6 py-5 sm:px-12 lg:px-16">
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"
-            >
-              <span aria-hidden="true">&larr;</span> Back to all articles
-            </Link>
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"
+              >
+                <span aria-hidden="true">&larr;</span> Back to all articles
+              </Link>
+              <nav aria-label="Share this article" className="flex flex-wrap items-center gap-2">
+                <span className="label mr-1 text-muted">Share</span>
+                {[
+                  { name: "X", icon: "x", href: xShare },
+                  { name: "Facebook", icon: "facebook", href: facebookShare },
+                  { name: "LinkedIn", icon: "linkedin", href: linkedInShare },
+                  { name: "DEV Community", icon: "devdotto", href: devToShare },
+                  { name: "Substack", icon: "substack", href: substackShare },
+                ].map((network) => (
+                  <a
+                    key={network.name}
+                    href={network.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label={`Share on ${network.name}`}
+                    title={`Share on ${network.name}`}
+                    className="inline-flex size-10 items-center justify-center rounded-md border border-border text-foreground transition-colors hover:border-border-strong hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+                  >
+                    <Icon name={network.icon} className="size-4" />
+                  </a>
+                ))}
+              </nav>
+            </div>
           </footer>
         </div>
       </Container>
