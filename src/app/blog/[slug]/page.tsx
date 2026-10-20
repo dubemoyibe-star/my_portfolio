@@ -84,18 +84,20 @@ export default async function BlogArticlePage({ params }: BlogArticleProps) {
       </section>
 
       <Container className="py-10 lg:py-16">
-        <div className="mx-auto max-w-prose-page overflow-hidden rounded-xl border border-border bg-surface shadow-lg shadow-black/10">
-          <div className="border-b border-border px-6 py-3.5 sm:px-10">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-xl border border-border bg-surface shadow-lg shadow-black/10">
+          <div className="border-b border-border px-6 py-3.5 sm:px-12 lg:px-16">
             <p className="label text-muted">
               <span className="text-accent">/</span> Article
             </p>
           </div>
 
-          <div className="px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
-            <Markdown text={post.content} />
+          <div className="px-6 py-8 sm:px-12 sm:py-12 lg:px-16 lg:py-14">
+            <div className="mx-auto max-w-3xl">
+              <Markdown text={post.content} />
+            </div>
           </div>
 
-          <footer className="border-t border-border bg-background/40 px-6 py-5 sm:px-10">
+          <footer className="border-t border-border bg-background/40 px-6 py-5 sm:px-12 lg:px-16">
             <Link
               href="/blog"
               className="inline-flex items-center gap-2 text-small text-muted transition-colors hover:text-link"

@@ -7,6 +7,6 @@ export const siteConfig: SiteConfig = {
     { label: "Experience", href: "/#experience" },
     { label: "Projects", href: "/projects" },
     { label: "Contributions", href: "/#contributions" },
-    { label: "Blogs", href: "/blog" },
+    { label: "Blog", href: "/blog" },
   ],
 };
