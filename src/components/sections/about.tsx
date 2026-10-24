@@ -10,7 +10,7 @@ import { getProfile } from "@/lib/data";
  * `@/lib/admin/profile-input` — but nothing on the public site has ever read
  * it. That is a real gap, not a deliberate one: the hero already carries
  * `bio.short` for the two-sentence version, and the long form — three
- * paragraphs on how the work gets chosen, the Web3 focus, open source — sits
+ * paragraphs on how the work gets chosen, the fullstack focus, open source — sits
  * in the database, truthful and already written, saying more about how this
  * person thinks about the work than a page built only from job titles and
  * project cards can. That is exactly the kind of context a reader — human or

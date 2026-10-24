@@ -29,12 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ]);
 
   return await pageMetadata({
-    /* The name is live; the role is not. "Fullstack & Blockchain Developer" is
-       a third phrasing of the job — shorter than `resume.title`, which is the
-       CV's formal register and reads as a mouthful in a browser tab — and the
-       content model has no field for it. Interpolating the name at least means
-       a rename does not leave the site's main title quoting the old one. */
-    title: `${identity.name} — Fullstack & Blockchain Developer`,
+    title: `${identity.name} — ${identity.role}`,
     description: profile.bio.short,
     path: "/",
     image: "home",

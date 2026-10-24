@@ -1,7 +1,7 @@
 # Oyibe Chidubem — Portfolio
 
-Personal portfolio site for **Oyibe Chidubem**, a fullstack and blockchain
-developer. Dark, terminal / data-intelligence aesthetic — futuristic through
+Personal portfolio site for **Oyibe Chidubem**, a fullstack developer. Dark,
+terminal / data-intelligence aesthetic — futuristic through
 restraint rather than effects.
 
 Every section is driven by a database and edited through a password-gated admin
@@ -48,34 +48,51 @@ panel. Nothing on the public site is hardcoded content.
 ```
 src/
 ├── app/
-│   ├── admin/            # password-gated dashboard (route group + login)
-│   ├── api/admin/        # login, logout, Cloudinary upload signature
-│   ├── cv/               # CV page + PDF export
-│   ├── llms.txt/         # generated llms.txt route
-│   ├── sitemap.ts        # generated sitemap.xml
+│   ├── admin/
+│   │   ├── (dashboard)/  # CRUD dashboard for blog, contributions, education,
+│   │   │                 # experience, profile, projects, and tech stack
+│   │   └── login/        # admin sign-in
+│   ├── api/admin/        # login, logout, and Cloudinary upload signature
+│   ├── blog/             # blog index, [slug] articles, and OG image
+│   ├── cv/               # CV page, PDF export, and OG image
+│   ├── llms.txt/         # generated model-readable site content
+│   ├── projects/         # project index, [slug] details, and social images
+│   ├── layout.tsx        # root layout and site-wide metadata
+│   ├── page.tsx          # home page
 │   ├── not-found.tsx     # custom 404
-│   ├── globals.css       # design tokens — single source of truth
-│   └── page.tsx          # home page (all public sections)
+│   ├── sitemap.ts        # generated sitemap
+│   └── globals.css       # design tokens and global styles
 ├── components/
-│   ├── admin/            # form fields, uploaders, list editors
-│   ├── sections/         # hero, projects, contributions, stack, ...
-│   ├── cards/ ui/ layout/ motion/ seo/
+│   ├── admin/            # dashboard navigation and reusable form controls
+│   ├── blog/             # article sharing
+│   ├── cards/            # project, contribution, and certification cards
+│   ├── cv/               # CV sections and download control
+│   ├── layout/           # header, footer, navigation, and page layout
+│   ├── motion/           # animation components
+│   ├── sections/         # home page sections
+│   ├── seo/              # JSON-LD structured data
+│   └── ui/               # shared interface components
+├── data/                 # seed and rollback content; not live content
 ├── lib/
-│   ├── data.ts           # the only read path from the database
-│   ├── prisma.ts         # runtime client (pooled DATABASE_URL)
-│   ├── admin/            # input parsing, validation, revalidation
-│   ├── auth.ts           # session token sign/verify
-│   └── cloudinary.ts     # upload signing, folder allowlist
-├── data/                 # seed input + rollback reference only — NOT live content
-├── types/                # shared domain types; the schema mirrors these
+│   ├── admin/            # input parsing, validation, asset cleanup, revalidation
+│   ├── data.ts           # database read path
+│   ├── prisma.ts         # runtime Prisma client
+│   ├── auth.ts           # admin session signing and verification
+│   ├── cloudinary.ts     # signed upload support
+│   ├── blog.ts           # blog content helpers
+│   ├── seo.ts            # metadata helpers
+│   └── site-identity.ts  # live profile identity with seed fallback
+├── types/index.ts        # shared domain types
 └── middleware.ts         # admin route gate
 
 prisma/
+├── migrations/           # database migration history
 ├── schema.prisma         # content models
-├── migrations/
-└── seed.ts               # bootstraps the database from src/data/
+├── seed.ts               # seed portfolio content from src/data/
+└── seed-blogs.ts         # seed blog posts
 
-docs/design-system.md     # tokens, typography, layout — read before adding UI
+public/                   # profile images, project covers, and static assets
+docs/design-system.md     # design tokens, typography, and layout guidance
 ```
 
 > `src/data/` is **not** the live source. It seeds an empty database and serves
