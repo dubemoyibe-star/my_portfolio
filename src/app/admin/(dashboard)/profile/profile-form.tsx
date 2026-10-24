@@ -238,7 +238,7 @@ export function ProfileForm({
               error={fieldErrors.tagline}
               hint="The line directly under your name in the hero."
               onChange={(event) => set("tagline", event.target.value)}
-              placeholder="Fullstack developer, blockchain developer…"
+              placeholder="Fullstack developer building useful digital products…"
             />
           </Field>
 
@@ -383,7 +383,7 @@ export function ProfileForm({
               error={fieldErrors.resumeTitle}
               hint="The formal title under your name on the CV."
               onChange={(event) => set("resumeTitle", event.target.value)}
-              placeholder="Fullstack web developer and blockchain developer"
+              placeholder="Fullstack developer"
             />
           </Field>
 

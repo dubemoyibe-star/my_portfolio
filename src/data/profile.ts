@@ -32,12 +32,12 @@ export const profile = {
 
   bio: {
     short:
-      "I build websites, web applications, and mobile apps that help businesses and startups reach more customers, increase sales, strengthen their online presence, and scale. I focus on turning ideas into practical digital products that solve real problems and deliver measurable value. I'm also a Web3 enthusiast and open-source contributor passionate about building useful products through technology.",
+      "I'm a fullstack developer who builds websites, web applications, mobile apps, and digital products that help businesses and startups grow. I focus on turning ideas into practical, reliable solutions that solve real problems, create great user experiences, and deliver measurable value. I'm also an open-source contributor who believes in building useful products in the open.",
     long: [
       "I build websites, web applications, mobile apps, and digital products that help businesses and startups reach more customers, increase sales, strengthen their online presence, and scale.",
       "I work with businesses, startups, and teams to turn ideas into practical, reliable digital solutions that solve real problems and deliver value. Beyond writing code, I focus on understanding business needs, creating great user experiences, and building products that people actually use.",
       "I'm open to collaborating with founders, businesses, and teams to launch new products, improve existing platforms, and build solutions that create opportunities for growth.",
-      "Open source is an important part of my work. I contribute to projects and believe in building in the open. I'm also a Web3 enthusiast interested in exploring emerging technologies and the possibilities they bring.",
+      "Open source is an important part of my work. I contribute to projects and believe in building useful products in the open.",
     ].join("\n\n"),
   },
 
@@ -104,7 +104,7 @@ export const profile = {
   resume: {
     title: "Fullstack developer",
     summary:
-      "Full-Stack Developer experienced in building web applications and digital products using TypeScript, JavaScript, and modern development technologies. Focused on creating practical, user-centered solutions that solve real-world problems, contribute to open-source projects, and deliver value to businesses and users. Web3 enthusiast interested in blockchain technology and decentralized applications.",
+      "Fullstack developer experienced in building websites, web applications, mobile apps, and digital products with TypeScript, JavaScript, and modern development technologies. Focused on creating practical, user-centered solutions that solve real-world problems, contribute to open-source projects, and deliver value to businesses and users.",
     /* Derived from the name — change if you want a different download filename. */
     fileName: "oyibe-chidubem-cv",
     location: "Nigeria",

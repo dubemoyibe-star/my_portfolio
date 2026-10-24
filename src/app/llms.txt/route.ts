@@ -117,10 +117,9 @@ export async function GET(): Promise<Response> {
   ]);
 
   /* `resume.summary` rather than `bio.short`: both are the real profile bio,
-     but the resume register is third person and already states the fullstack /
-     blockchain / Web3 shape of the work in one paragraph. The site's first
-     person voice ("I like solving real problems") is written for a reader
-     browsing a page, and reads as noise once it is quoted back as fact. */
+     but the resume register is third person and summarizes the work in one
+     paragraph. The site's first-person voice is written for a reader browsing
+     a page, and reads as noise once it is quoted back as fact. */
   const summary = oneLine(profile.resume.summary);
 
   /* The two facts the summary leaves out and a model is regularly asked for.

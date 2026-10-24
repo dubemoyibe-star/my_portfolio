@@ -1,7 +1,7 @@
 # Oyibe Chidubem — Portfolio
 
-Personal portfolio site for **Oyibe Chidubem**, a fullstack and blockchain
-developer. Dark, terminal / data-intelligence aesthetic — futuristic through
+Personal portfolio site for **Oyibe Chidubem**, a fullstack developer. Dark,
+terminal / data-intelligence aesthetic — futuristic through
 restraint rather than effects.
 
 Every section is driven by a database and edited through a password-gated admin

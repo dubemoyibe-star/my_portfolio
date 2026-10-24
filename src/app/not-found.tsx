@@ -7,16 +7,6 @@ import { RequestedPath } from "@/app/requested-path";
 import { getSiteIdentity } from "@/lib/site-identity";
 
 /**
- * The role, in the site's own register rather than the CV's.
- *
- * The identity's `role` is `profile.resume.title` — "Fullstack web developer
- * and blockchain developer" — the formal phrasing the CV speaks in. The
- * home page's title uses this shorter form, and someone who landed here from a
- * stray link should read the same line they would have read there.
- */
-const ROLE = "Fullstack & Blockchain Developer";
-
-/**
  * Where a lost visitor can go. Deliberately not `siteConfig.nav`: that is the
  * header's set — the sections worth a persistent slot next to a wordmark —
  * while this is a rescue list, so it leads with Home and includes the CV and
@@ -114,7 +104,7 @@ export default async function NotFound() {
 
           <p data-reveal className="mt-5 text-pretty text-body-lg text-muted">
             <span className="font-mono text-foreground">{identity.name}</span>{" "}
-            — {ROLE}. This is my portfolio: the things I&apos;ve built, the open
+            — {identity.role}. This is my portfolio: the things I&apos;ve built, the open
             source I contribute to, and my CV. Whatever the link you followed
             was pointing at, it is probably one of these.
           </p>
